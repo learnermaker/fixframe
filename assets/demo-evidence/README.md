@@ -7,7 +7,7 @@ This directory is the provenance register for photographs used or considered for
 ## Asset status
 
 | Local file (`public/demo-assets/evidence/`) | Creator / source | Licence | Scenario status |
-|---|---|---|---|---|
+|---|---|---|---|
 | `ceiling-water-damage.jpg` | Atomicdragon136, Wikimedia Commons — [source file](https://commons.wikimedia.org/wiki/File:Ceiling_water_damage.jpg) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | Used: `water-ingress-01` |
 | `industrial-pipes-corrosion.jpg` | Attila Lénert, Unsplash — [source photo](https://unsplash.com/photos/rusty-industrial-pipes-and-valves-in-a-factory-6uJTDNz6n0k) | [Unsplash License](https://unsplash.com/license) | Used: `pipework-corrosion-04` |
 | `bridge-concrete-spalling.jpg` | OregonDOT, Wikimedia Commons — [source file](https://commons.wikimedia.org/wiki/File:Spalling_concrete_on_the_pier_columns.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) | Used: `concrete-spalling-05` |
