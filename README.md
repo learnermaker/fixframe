@@ -2,9 +2,11 @@
 
 **From visual evidence to human-verified maintenance action.**
 
+[![CI](https://github.com/learnermaker/fixframe/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/learnermaker/fixframe/actions/workflows/ci.yml)
+
 FixFrame is an AI-assisted visual inspection workflow that turns an image and inspection context into structured, reviewable maintenance work. It combines **Meta SAM 3.1** for visual-region segmentation with **Muse Spark** for multimodal interpretation and structured issue extraction, then keeps a human in control of review, approval and work-order creation.
 
-[Repository](https://github.com/learnermaker/fixframe) · [Hackathon submission notes](docs/HACKATHON_SUBMISSION.md) · [Demo-data and safety policy](docs/DEMO_DATA.md) · [Photo credits and asset provenance](assets/demo-evidence/README.md)
+[Hackathon submission copy](docs/HACKATHON_SUBMISSION.md) · [Demo-data and safety policy](docs/DEMO_DATA.md) · [Photo credits and asset provenance](assets/demo-evidence/README.md) · [Meta API implementation notes](docs/META_API_NOTES.md)
 
 ## The workflow
 
@@ -30,9 +32,17 @@ The application distinguishes `LIVE_META`, `DEMO_FIXTURE` and `USER_EDIT` proven
 
 ## Demo scenarios and data
 
-The repository includes five authored inspection scenarios covering ceiling discolouration, a cable-sheath mark, a handrail bracket, pipework corrosion and concrete deterioration.
+The repository includes five inspection scenarios covering ceiling discolouration, a cable-sheath mark, a handrail bracket, pipework corrosion and concrete deterioration.
 
 Scenario sites, asset labels, transcripts, people, work orders and maintenance records are fictional. The visual inputs include three credited third-party photographs and two authored illustrations. The photographs are visual examples only; they are not evidence of a FixFrame customer site, incident or maintenance outcome. See [the demo-data policy](docs/DEMO_DATA.md) and [asset provenance register](assets/demo-evidence/README.md).
+
+## Verification snapshot
+
+- The GitHub Actions CI workflow passed on the current `main` commit at the time this README was updated. It ran root install, lint, typecheck, unit tests, production build, test-package install/typecheck, API acceptance and Playwright E2E.
+- The provider hardening work records live SAM and Muse calls through FixFrame's own routes. The subsequent photo integration PR reports successful live SAM and Muse responses for all five scenarios, each run once. Model output varies; these smoke tests do not establish real-world accuracy.
+- The full-history Gitleaks scan from the open QA follow-up is not yet part of the current `main` workflow. Do not interpret the green CI badge as evidence that a full-history secret scan has passed.
+
+See [the QA report](docs/QA_REPORT.md) for the current verification evidence and limitations.
 
 ## Safety and scope
 
