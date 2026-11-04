@@ -29,7 +29,7 @@ Needs Node 24 (the fake upstream process runs a `.ts` file directly). Do not run
 | Suite | App under test | Upstream |
 |---|---|---|
 | `acceptance/fixture-mode`, `byok` (fixture case) | `FIXFRAME_PROVIDER_MODE=fixture` | none |
-| `acceptance/live-failures`, `live-success`, `byok`, `secrets` | live mode, per-test instance | local **mock** (`support/fake-meta.ts`) that records the bearer credential |
+| `acceptance/live-failures`, `live-success`, `provider-hardening`, `byok`, `secrets` | live mode, per-test instance | local **mock** (`support/fake-meta.ts`) that records the bearer credential |
 | `e2e` projects `desktop-1280x800`, `mobile-375x812` | fixture mode, port 3100 | none |
 | `e2e` project `live-mock-desktop` (`byok`, `live-ui`) | live mode, port 3101, no deployment key | mock upstream process on port 3199 |
 
@@ -43,9 +43,19 @@ All accessible names are in `e2e/ui.ts`, taken from the real components (checked
 
 - HTTP status per error code: `UNCONFIGURED` 503, `TIMEOUT` 504, `RATE_LIMITED` 429, `UPSTREAM_ERROR` 502, `INVALID_RESPONSE` 502, `UNSUPPORTED_INPUT` 400, `SAFETY_REVIEW_REQUIRED` 422 (`src/server/providers/route.ts`).
 - Unset `FIXFRAME_PROVIDER_MODE` means **live**; fixtures need an explicit opt-in.
-- Upstream timeout is a fixed 60 s, so the two TIMEOUT tests take ~60 s (run concurrently).
+- Upstream timeout defaults to 60 s and is set by `META_API_TIMEOUT_MS`; CI sets 2000 for the acceptance step. Without it the two hang tests take ~60 s each (run concurrently).
 - The BYOK panel exists only in live mode.
 
 ## Not automated
 
-Persistence on refresh (documented limitation), a WCAG audit, screenshot/recording secret review, real-device mobile, live Meta smoke tests.
+Persistence on refresh (documented limitation), a WCAG audit, screenshot/recording secret review, real-device mobile.
+
+## Manual live smoke test (real Meta calls, never in CI)
+
+After `npm run build`, with a real key in the environment only (it makes three real calls: SAM, Muse Spark, and one deliberately bad key):
+
+```bash
+FIXFRAME_LIVE_KEY=<your key> npm run live-smoke --prefix tests
+```
+
+It starts the production app in live mode with no deployment key, sends the key as the BYOK header, validates both results with the canonical schemas, and checks the key is absent from responses and server logs. A pass is a dated result for scenario `water-ingress-01` only.

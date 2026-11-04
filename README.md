@@ -33,13 +33,16 @@ Actual model IDs, endpoints, payloads, schemas, and limits must be verified agai
 
 ## Repository status
 
-The initial product and engineering specification is being established. See:
+A working prototype: a Next.js app with a full synthetic fixture flow, live SAM 3.1 / Muse Spark providers behind explicit configuration, and an automated acceptance and browser test suite. What was and was not verified is recorded, with dates and commands, in [docs/QA_REPORT.md](docs/QA_REPORT.md); release status is in [docs/RELEASE_NOTES.md](docs/RELEASE_NOTES.md). Read those rather than taking this paragraph's word for it.
+
 - [PLAN.md](PLAN.md) — priorities, work packets, and acceptance gates.
 - [ARCHITECTURE.md](ARCHITECTURE.md) — component design, data contracts, provenance, and safety.
 - [DEMO_SCRIPT.md](DEMO_SCRIPT.md) — three-minute walkthrough.
 - [docs/DEMO_DATA.md](docs/DEMO_DATA.md) — synthetic scenario policy.
 - [docs/TEST_PLAN.md](docs/TEST_PLAN.md) — test and acceptance matrix.
 - [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md) — release gate.
+- [docs/DEMO_CAPTURE_CHECKLIST.md](docs/DEMO_CAPTURE_CHECKLIST.md) — recording checklist.
+- [docs/decisions/](docs/decisions/) — accepted design decisions (domain contract, bring-your-own key).
 
 ## Principles
 
@@ -67,6 +70,19 @@ Open http://localhost:3000. `npm run dev` runs the development server instead.
 
 Checks: `npm run lint`, `npm run typecheck`, `npm test`. The acceptance and browser suites live in `tests/`; see [tests/README.md](tests/README.md).
 
+The build downloads the Barlow fonts from Google Fonts (`next/font/google`), so it needs network access.
+
+### Using a Meta API key safely
+
+- Set `META_API_TOKEN` only in a local `.env` or your host's secret store. `.env` is git-ignored; never commit a key, put it in a `NEXT_PUBLIC_*` variable, or paste it into an issue, screenshot or recording.
+- A visitor can instead enter their own key in live mode. It is held in browser memory only, sent as the `X-FixFrame-Meta-Key` header to this server, forwarded to Meta and not stored by FixFrame, but whoever operates the server could read it in transit. Do not enter a key on a server you do not trust ([ADR 0002](docs/decisions/0002-byok-meta-api-key.md)).
+- Calling Meta is governed by your own Meta account terms. A key that has been pasted into a chat or ticket should be treated as exposed and rotated.
+- `tests/` has a manual live smoke test (`FIXFRAME_LIVE_KEY=... npm run live-smoke --prefix tests`) that makes three real calls; it is never run in CI.
+
+## Contributing and security
+
+Open an issue or pull request. CI (lint, typecheck, unit tests, build, acceptance, Playwright, and a full-history secret scan) must pass. Do not include real credentials or real maintenance data in anything you submit. To report a security problem, contact the maintainer privately instead of opening a public issue.
+
 ## License
 
-Private during development. Before public release, choose and add an appropriate OSI-approved license and verify all code and asset redistribution rights.
+Source code and documentation: [MIT](LICENSE). The synthetic demo images and masks are CC0 1.0 ([assets/README.md](assets/README.md)). Third-party packages keep their own licences, and one runtime dependency, `@meta-sam/parser`, is under Meta's custom SAM License rather than an OSI licence: see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) before redistributing a build. This is an inventory, not legal advice.

@@ -73,7 +73,10 @@ jobs:
       - run: npm run build
       - run: npm ci --prefix tests
       - run: npm run typecheck --prefix tests
-      - run: npm run acceptance --prefix tests
+      - name: Acceptance (upstream timeout shortened so the hang tests take seconds, not 60 s each)
+        run: npm run acceptance --prefix tests
+        env:
+          META_API_TIMEOUT_MS: "2000"
 
       - name: Cache Playwright browsers
         id: pw-cache

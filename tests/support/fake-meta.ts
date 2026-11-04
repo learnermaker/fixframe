@@ -4,6 +4,8 @@ import { createServer, type Server } from "node:http";
 // (src/server/providers/metaClient.ts); none of them is evidence about the real Meta API.
 export type UpstreamMode =
   | "malformed-json-shape" | "not-json" | "http-500" | "http-429" | "hang"
+  | "http-400" | "http-413" | "http-408" | "http-504"
+  | "muse-unsafe-evidence" // extraction: clean title/description, but the evidence text states the area is safe
   | "muse-valid"      // extraction: well-formed issue; segmentation: unreadable text
   | "muse-overwrite"  // extraction: well-formed issue that also tries to set trusted fields
   | "muse-unsafe"     // extraction: issue that states a cause
@@ -35,6 +37,7 @@ function museIssue(body: any, mode: UpstreamMode) {
     unknowns: ["source of the mark", "hidden extent", "safety status"],
   };
   if (mode === "muse-unsafe") issue.description = "The patch is caused by a leaking pipe above.";
+  if (mode === "muse-unsafe-evidence") (issue.evidence as { supports: string }[])[0]!.supports = "The area is safe to use.";
   if (mode === "muse-overwrite") Object.assign(issue, { location: "Attacker-chosen room", assetLabel: "FAKE-ASSET-99", scenarioId: "other", status: "completed", id: "evil" });
   return issue;
 }
@@ -58,6 +61,8 @@ export async function startFakeMeta(mode: UpstreamMode, opts: { rejectKey?: stri
       }
       if (mode === "hang") return; // never answer
       if (mode === "http-500") { res.writeHead(500, { "content-type": "application/json" }); return void res.end('{"error":"boom"}'); }
+      const plain = /^http-(400|413|408|504)$/.exec(mode);
+      if (plain) { res.writeHead(Number(plain[1]), { "content-type": "application/json" }); return void res.end('{"error":"mock"}'); }
       if (mode === "http-429") { res.writeHead(429, { "retry-after": "1", "content-type": "application/json" }); return void res.end('{"error":"slow down"}'); }
       if (mode === "not-json") { res.writeHead(200, { "content-type": "text/html" }); return void res.end("<html>nope</html>"); }
       const json = (v: unknown) => { res.writeHead(200, { "content-type": "application/json", "x-request-id": FAKE_REQUEST_ID }); res.end(JSON.stringify(v)); };
