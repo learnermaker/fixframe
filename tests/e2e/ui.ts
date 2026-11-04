@@ -18,7 +18,15 @@ export const ui = {
   addFeedback: (p: Page) => p.getByRole("button", { name: /add feedback|submit feedback|send feedback/i }),
   timeline: (p: Page) => p.getByRole("list", { name: /timeline|audit|events/i }),
   error: (p: Page) => p.getByRole("alert"),
+  // ADR 0002: password-masked input + explicit "use for this session" / clear controls.
+  byokInput: (p: Page) => p.getByLabel(/meta api key|api key/i).first(),
+  byokUse: (p: Page) => p.getByRole("button", { name: /use for this session/i }),
+  byokClear: (p: Page) => p.getByRole("button", { name: /clear/i }).first(),
 };
+
+// Header carrying a user-entered key to same-origin API routes (ADR 0002).
+export const BYOK_HEADER_LC = "x-fixframe-meta-key";
+export const E2E_SENTINEL_BYOK = "FF_SENTINEL_BYOK_do-not-leak-4d81e2";
 
 export const FIXTURE_LABEL = /DEMO[_ ]FIXTURE/i;
 export const LIVE_LABEL = /LIVE[_ ]META/i;

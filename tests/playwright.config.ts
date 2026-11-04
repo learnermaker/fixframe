@@ -12,6 +12,8 @@ export default defineConfig({
   use: { baseURL: `http://127.0.0.1:${PORT}`, trace: "retain-on-failure", screenshot: "only-on-failure" },
   projects: [
     { name: "desktop-1280x800", use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } } },
+    // Narrow mobile width (acceptance: core flow works at both). Chromium engine with a phone-sized viewport.
+    { name: "mobile-375x812", use: { ...devices["Desktop Chrome"], viewport: { width: 375, height: 812 }, hasTouch: true } },
   ],
   webServer: {
     // Deliberate fixture mode, no credentials: acceptance case A1. Requires a prior `npm run build` in the repo root.

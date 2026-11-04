@@ -63,10 +63,10 @@ export async function startApp(env: Record<string, string>): Promise<RunningApp>
   };
 }
 
-export async function post(app: RunningApp, route: "segment" | "extract", body: unknown) {
+export async function post(app: RunningApp, route: "segment" | "extract", body: unknown, headers: Record<string, string> = {}) {
   const res = await fetch(`${app.url}/api/${route}`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...headers },
     body: typeof body === "string" ? body : JSON.stringify(body),
   });
   const text = await res.text();

@@ -9,6 +9,18 @@ permissions:
   contents: read
 
 jobs:
+  # Full-history secret scan. Not yet run by D (no scanner installed locally); first result will be this job's.
+  secret-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 25
