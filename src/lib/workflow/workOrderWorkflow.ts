@@ -151,7 +151,7 @@ export function applyWorkflowAction(state: WorkflowState, action: WorkflowAction
             events: [],
           },
         },
-        { type: "work_order_created", message: `Work order ${template.id} created` },
+        { type: "work_order_created", message: "Work order created" },
       );
     }
 
@@ -169,7 +169,7 @@ export function applyWorkflowAction(state: WorkflowState, action: WorkflowAction
         },
         {
           type: "status_changed",
-          message: `Status changed to ${action.status}`,
+          message: `Status changed to ${action.status.replaceAll("_", " ")}`,
           changes: [{ field: "status", from: workOrder.status, to: action.status }],
         },
       );
