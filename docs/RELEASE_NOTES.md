@@ -1,49 +1,40 @@
 # Release readiness — status as of 2026-11-04
 
-Source of truth for gates: `docs/SUBMISSION_CHECKLIST.md` and `docs/TEST_PLAN.md`. Evidence: `docs/QA_REPORT.md`. The repository **remains private**; this document does not change that.
+Source of truth: `docs/SUBMISSION_CHECKLIST.md`, `docs/TEST_PLAN.md`, and the current [QA report](QA_REPORT.md). The repository remains private.
 
 ## Recommendation
 
-**Do not make the repository public yet.** The application, licence and assets do not exist, and no test has run against a real build. Re-evaluate after the blockers below are cleared and the pre-public steps are done.
+**Do not make the repository public yet.** Domain contracts, synthetic data, workflow logic and the QA harness are merged, but the runnable application and provider routes are not yet integrated. Build/test evidence against the real app is absent.
 
-## Blockers
+## Current blockers
 
 | # | Blocker | Owner |
 |---|---|---|
-| 1 | No runnable app on `main`; root `package.json` scripts (`lint`, `typecheck`, `test`, `build`, `start`) absent -> CI cannot pass | A/B/C, integration owner |
-| 2 | README says setup commands "will be added"; clean-clone install fails today | integration owner (README) after #1 |
-| 3 | Core E2E flow never executed; UI selectors unconfirmed | A, then D |
-| 4 | Live SAM 3.1 and Muse Spark never smoke-tested (needs credentials) — cannot claim "live" for either | B / user |
-| 5 | No `LICENSE`; no code/asset licence decision | integration owner |
-| 6 | No synthetic images or `assets/README.md`; asset provenance unverified | C |
-| 7 | No third-party notices / dependency licence review for the app | D after #1 |
-| 8 | Full-history secret scan with a real tool (gitleaks/trufflehog) not run; manual review of history after all agent PRs merge | D / integration owner |
+| 1 | Next.js application, API routes and root scripts (`lint`, `typecheck`, `test`, `build`, `start`) not yet integrated; CI cannot pass | Frontend/provider agent + integration owner |
+| 2 | README setup instructions still need to match a clean install of the final app | Integration owner after app merge |
+| 3 | Core E2E flow written but never executed against the real app; selectors may need adjustment | Frontend, then D |
+| 4 | Live SAM 3.1 and Muse Spark calls have not been smoke-tested | Provider agent / maintainer |
+| 5 | BYOK security contract accepted; implementation and tests pending | Frontend + provider agent |
+| 6 | No `LICENSE`; code/asset licensing and third-party notices need final maintainer review | Integration owner |
+| 7 | Dependency licence review for the final application is pending | D |
+| 8 | Dedicated full-history secret scan not run after agent code merges | D / integration owner |
 
-## Release checklist (from `SUBMISSION_CHECKLIST.md`)
+## Completed foundation
 
-Legend: DONE = verified with evidence; NO = not done; BLOCKED = needs another workstream.
+- Workstream C merged: canonical Zod contracts, three synthetic scenarios, fixtures, authored PNG/SVG assets, evidence checks and workflow reducer.
+- Workstream D merged: CI workflow, black-box acceptance harness, Playwright E2E definitions, QA report and demo/release checklists.
+- ADR 0001 accepted; ADR 0002 defines session-only BYOK.
+- Repository is still private. No public release action has been taken.
 
-**Technical**
-- [NO] Fresh install/build/test — blocked on app
-- [DONE, partial] `.env.example` documents `FIXFRAME_PROVIDER_MODE`, `META_API_TOKEN`, `META_API_BASE_URL`; token value is empty; the tracked-env-file / `NEXT_PUBLIC_*` check passed against this repo's real `.env.example` during the harness run
-- [DONE, partial] No keys in current git history (regex scan only, docs-only history)
-- [BLOCKED] No keys in bundle/logs — test written, needs app
-- [BLOCKED] Model IDs/endpoints match official docs — B's responsibility; not reviewed by D
-- [BLOCKED] CI green
-- [NO] No runtime dependency on private Appdraft source — cannot check without app code; `ARCHITECTURE.md` states the rule
+## Required release sequence
 
-**Open source**
-- [NO] Licence chosen, `LICENSE` added, third-party notices
-- [NO] Assets verified redistributable
-- [NO] Private data/secrets removed from entire history — nothing found in current 5 commits, re-run after merges
-- [NO] Make public only after final review (explicitly **not** done)
+1. Integrate frontend and Meta provider implementations against the accepted contracts and BYOK ADR.
+2. Ensure root package scripts and lockfile support a clean install, lint, typecheck, tests, production build and production start.
+3. Run D's acceptance suite and Playwright E2E against the real application; update QA report with actual results.
+4. Run live SAM and Muse smoke tests with synthetic inputs when credentials are available. Never represent mocked tests as live verification.
+5. Verify BYOK precedence, missing-key handling, no-fallback semantics and secret non-disclosure.
+6. Choose a source licence, confirm asset licence, add `LICENSE` and third-party notices.
+7. Run a dedicated secret scanner across full git history after all code merges; rotate any exposed credential.
+8. Verify README, demo recording, and submission description; only then make the repo public and verify logged-out access.
 
-**Product / demo / submission**: not assessable yet; see `docs/DEMO_CAPTURE_CHECKLIST.md` for the recording prep. Hackathon upload rules, Indie Developer track selection, logged-out URL check and submission confirmation are the maintainer's to verify.
-
-## Pre-public steps (in order)
-1. Merge A/B/C; make root scripts exist; CI green on `main`.
-2. Run `docs/QA_REPORT.md` commands again on a fresh clone; update the report with real results.
-3. Run live smoke tests (A11) with a real key and record outcome; remove or relabel any claim not shown.
-4. Choose licence; fill `assets/README.md`; add notices.
-5. Secret scan of full history with a dedicated tool; rotate any key that ever touched the repo.
-6. Open the repo logged-out/incognito to confirm what is visible, then flip visibility (maintainer only).
+Hackathon submission rules, track selection, video accessibility, and deadline confirmation remain maintainer responsibilities.
