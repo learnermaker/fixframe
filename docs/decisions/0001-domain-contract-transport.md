@@ -32,7 +32,7 @@ Status: **accepted by maintainer** on 2026-11-04.
 | Status graph | `open → in_progress, blocked`; `in_progress → blocked, completed`; `blocked → in_progress`; `completed` is terminal. | Explicit workflow transition policy. |
 | `mask.format` | `alpha-png-data-url` or `public-path`. | Fixtures use `public-path`; live adapter may use a data URL. |
 | `boxes[]` | `{ x, y, width, height }` in image pixels, top-left origin, within image bounds. | Defines coordinate semantics. |
-| `Scenario.image.path` | PNG under `/demo-assets/`. | Keeps image/mask alignment for authored illustrations. |
+| `Scenario.image.path` | PNG under `/demo-assets/`. Widened to JPEG by ADR 0003. | Keeps image/mask alignment for authored illustrations. |
 | `Scenario.segmentationPrompt` | Added. | Frontend needs a prompt for `POST /api/segment`. |
 | Transcript evidence ref | `transcriptRef(scenarioId)`, e.g. `transcript-water-ingress-01`. Image-region refs use segmentation `id`. | Stable refs without extra scenario fields. |
 | `Feedback` | `{ id, author, message, createdAt }`. | Defines feedback records. |

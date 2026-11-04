@@ -82,7 +82,13 @@ export const ScenarioSchema = z.strictObject({
   site: NonEmpty,
   area: NonEmpty,
   assetLabel: NonEmpty,
-  image: z.strictObject({ path: z.string().regex(/^\/demo-assets\/[\w-]+\.png$/), alt: NonEmpty }),
+  image: z.strictObject({
+    path: z.string().regex(/^\/demo-assets\/[\w/-]+\.(png|jpg)$/),
+    alt: NonEmpty,
+    width: z.number().int().positive(),
+    height: z.number().int().positive(),
+    credit: z.strictObject({ text: NonEmpty, url: z.url() }).optional(), // required by the photo's licence where it has one
+  }),
   transcript: NonEmpty,
   segmentationPrompt: NonEmpty, // noun phrase sent as the POST /api/segment `prompt`
   expectedIssueId: NonEmpty,

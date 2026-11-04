@@ -2,9 +2,9 @@
 
 **From visual evidence to a reviewable maintenance workflow.**
 
-FixFrame is a hackathon prototype that turns a maintenance observation into a structured, editable work order. A user selects a clearly labelled synthetic scenario, reviews a photo and a prerecorded demo transcript, gets image-region segmentation and AI-assisted issue extraction, confirms or corrects the facts, and tracks the work order through a simple lifecycle.
+FixFrame is a hackathon prototype that turns a maintenance observation into a structured, editable work order. A user selects a demo scenario, reviews a photo and an authored demo transcript, gets image-region segmentation and AI-assisted issue extraction, confirms or corrects the facts, and tracks the work order through a simple lifecycle.
 
-> **Demo-only project.** All sites, assets, people, observations, equipment IDs, transcripts, work orders, and outcomes in this repository are fictional or synthetic. They are not evidence of customer use, field validation, real incidents, or actual maintenance outcomes.
+> **Demo-only project.** All sites, assets, people, observations, equipment IDs, transcripts, work orders, and outcomes in this repository are fictional or synthetic. Some scenario images are real third-party photographs, credited in the app and recorded in [assets/demo-evidence/README.md](assets/demo-evidence/README.md). They are not evidence of customer use, field validation, real incidents, or actual maintenance outcomes.
 
 ## Product flow
 

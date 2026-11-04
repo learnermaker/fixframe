@@ -67,10 +67,23 @@ export function ScenarioWorkspace({ scenario, apiKey }: { scenario: Scenario; ap
       <section aria-labelledby="evidence-heading" className="space-y-3 lg:sticky lg:top-4">
         <h2 id="evidence-heading" className="font-display text-2xl">Source evidence</h2>
         <figure>
-          <div className="relative">
-            <Image src={scenario.image.path} alt={scenario.image.alt} width={1280} height={720} unoptimized className="block h-auto w-full" />
+          {/* The frame shrinks to the capped image, because the overlay is positioned against it. */}
+          <div className="relative mx-auto w-fit max-w-full">
+            <Image
+              src={scenario.image.path}
+              alt={scenario.image.alt}
+              width={scenario.image.width}
+              height={scenario.image.height}
+              unoptimized
+              className="block h-auto max-h-[70vh] w-auto max-w-full"
+            />
             {segmentation && overlayOn && <RegionOverlay segmentation={segmentation} />}
           </div>
+          {scenario.image.credit && (
+            <p className="mt-1 text-xs text-slate">
+              <a href={scenario.image.credit.url} target="_blank" rel="noreferrer" className="underline">{scenario.image.credit.text}</a>
+            </p>
+          )}
           {segmentation && (
             <figcaption className="mt-2 space-y-1">
               <div className="flex flex-wrap items-center justify-between gap-2">

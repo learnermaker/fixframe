@@ -5,7 +5,7 @@ import { Resvg } from "@resvg/resvg-js";
 
 const root = new URL("../../public/demo-assets/", import.meta.url);
 
-for (const name of ["ceiling-tile", "cable-sheath", "handrail-bracket"]) {
+for (const name of ["cable-sheath", "handrail-bracket"]) {
   for (const dir of ["", "masks/"]) {
     const svg = readFileSync(new URL(`src/${dir}${name}.svg`, root), "utf8");
     const rendered = new Resvg(svg, { font: { loadSystemFonts: true } }).render();

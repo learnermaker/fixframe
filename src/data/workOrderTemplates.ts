@@ -56,4 +56,34 @@ export const WORK_ORDER_TEMPLATES: Readonly<Record<string, WorkOrderTemplate>> =
       "Inspection decision is recorded by a human reviewer",
     ],
   },
+  "pipework-corrosion-04": {
+    id: "WO-DEMO-004",
+    title: "Review reported pipe joint corrosion",
+    summary: "Review the observation and determine whether a qualified inspection is needed.",
+    owner: "Demo Maintenance Team",
+    checklist: [
+      { id: "check-1", label: "Confirm the reported joint in plant room 2" },
+      { id: "check-2", label: "Review the source photo and note" },
+      { id: "check-3", label: "Record a qualified follow-up decision" },
+    ],
+    acceptanceCriteria: [
+      "Observation and unknowns have been reviewed",
+      "Follow-up decision is recorded by a human reviewer",
+    ],
+  },
+  "concrete-spalling-05": {
+    id: "WO-DEMO-005",
+    title: "Review reported concrete deterioration",
+    summary: "Review the observation and determine whether a qualified inspection is needed.",
+    owner: "Demo Facilities Team",
+    checklist: [
+      { id: "check-1", label: "Confirm the reported location on support column 5" },
+      { id: "check-2", label: "Review the source photo and note" },
+      { id: "check-3", label: "Record a qualified follow-up decision" },
+    ],
+    acceptanceCriteria: [
+      "Observation and unknowns have been reviewed",
+      "Follow-up decision is recorded by a human reviewer",
+    ],
+  },
 };

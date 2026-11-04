@@ -1,15 +1,13 @@
 # Demo asset inventory
 
-Every image is a synthetic illustration authored for FixFrame as hand-written SVG. None derives from a photograph, a stock library, a real site, a real person, or a logo.
+The images listed here are illustrations authored for FixFrame as hand-written SVG. None derives from a photograph, a stock library, a real site, a real person, or a logo. Third-party photographs used by other scenarios are recorded in [demo-evidence/README.md](demo-evidence/README.md), with their licences and credits.
 
 Licence: released by the FixFrame project under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) so they can be redistributed with the repository whichever code licence is selected. This is a project decision for the maintainer to confirm before public release.
 
 | Published PNG (1280x720) | SVG source | Used by | Depicts |
 |---|---|---|---|
-| `public/demo-assets/ceiling-tile.png` | `public/demo-assets/src/ceiling-tile.svg` | `water-ingress-01` | Ceiling grid with a discoloured patch on one tile |
 | `public/demo-assets/cable-sheath.png` | `public/demo-assets/src/cable-sheath.svg` | `cable-sheath-02` | Disconnected display cable on a bench with a mark on its sheath |
 | `public/demo-assets/handrail-bracket.png` | `public/demo-assets/src/handrail-bracket.svg` | `handrail-bracket-03` | Mock handrail with one bracket out of line |
-| `public/demo-assets/masks/ceiling-tile.png` | `public/demo-assets/src/masks/ceiling-tile.svg` | fixture `water-ingress-01-mask-v1` | Alpha mask of the patch |
 | `public/demo-assets/masks/cable-sheath.png` | `public/demo-assets/src/masks/cable-sheath.svg` | fixture `cable-sheath-02-mask-v1` | Alpha mask of the sheath mark |
 | `public/demo-assets/masks/handrail-bracket.png` | `public/demo-assets/src/masks/handrail-bracket.svg` | fixture `handrail-bracket-03-mask-v1` | Alpha mask of the bracket |
 

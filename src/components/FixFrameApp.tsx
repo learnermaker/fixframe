@@ -44,7 +44,7 @@ export function FixFrameApp({ providerMode, hasDeploymentKey }: Props) {
                 onClick={() => setScenarioId(s.id)}
                 className={`flex items-center gap-3 border-2 bg-panel p-2 text-left hover:border-graphite ${s.id === scenarioId ? "border-graphite" : "border-transparent"}`}
               >
-                <Image src={s.image.path} alt="" width={96} height={54} unoptimized className="shrink-0" />
+                <Image src={s.image.path} alt="" width={96} height={54} unoptimized className="h-[54px] w-24 shrink-0 object-cover" />
                 <span>
                   <span className="block font-semibold leading-tight">{s.title}</span>
                   <span className="block text-sm text-slate">{s.site}</span>

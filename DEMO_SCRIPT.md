@@ -10,7 +10,7 @@ Use one low-risk synthetic scenario. Keep another scenario ready as a brief robu
 
 | Time | Screen / action | Narration |
 |---|---|---|
-| 0:00–0:15 | Open gallery. Show `SYNTHETIC DEMO DATA` banner. Select ceiling tile scenario. | “This is a fully synthetic facilities scenario. The input is a photo and a demo transcript—not a real incident.” |
+| 0:00–0:15 | Open gallery. Select ceiling tile scenario. | “This is a demo scenario: a real photo with fictional site details and an authored transcript.” |
 | 0:15–0:35 | Show original photo, fictional site/area and transcript. | “The source evidence stays visible. We do not infer the hidden cause or declare the area safe.” |
 | 0:35–1:00 | Run SAM 3.1; overlay returned mask/region. Show provenance. | “SAM identifies a region of interest. This is visual assistance, not a defect diagnosis.” |
 | 1:00–1:25 | Run Muse Spark extraction. Show structured issue and unknowns. | “Muse Spark turns the evidence into a structured observation. Unknowns stay explicit.” |

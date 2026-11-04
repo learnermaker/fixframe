@@ -13,7 +13,7 @@ const SCENARIO = "water-ingress-01";
 
 // One record in the format the official parser's README documents for SAM 3.1 output.
 const SAM_TEXT =
-  "<0f>0<|box;x1=211;y1=228;x2=270;y2=254;w=1280;h=720|>" +
+  "<0f>0<|box;x1=211;y1=228;x2=270;y2=254;w=1600;h=1200|>" +
   "<|mask;x=0;y=0;data=27,60,~!!!!M!0c[0o91w?q1!pIH4pPRVp2B3'7`e.ioeAf6-k/#Xd8%dX9x(|>\n";
 
 const metaReply = (text: string) => ({
@@ -209,7 +209,7 @@ describe("SAM mask geometry", () => {
     return (x: number, y: number) => pixels[y * (1 + width * 2) + 1 + x * 2 + 1];
   }
   const record = (id: number, left: number, top: number) =>
-    `${id}<|box;x1=${left};y1=${top};x2=${left + 59};y2=${top + 26};w=1280;h=720|><|mask;x=0;y=0;data=27,60,~!!!!M!0c[0o91w?q1!pIH4pPRVp2B3'7\`e.ioeAf6-k/#Xd8%dX9x(|>`;
+    `${id}<|box;x1=${left};y1=${top};x2=${left + 59};y2=${top + 26};w=1600;h=1200|><|mask;x=0;y=0;data=27,60,~!!!!M!0c[0o91w?q1!pIH4pPRVp2B3'7\`e.ioeAf6-k/#Xd8%dX9x(|>`;
   async function segmentOf(text: string) {
     reply(metaReply(text));
     const parsed = SegmentResponseSchema.parse(await (await segment(USER_KEY)).json());
@@ -242,8 +242,8 @@ describe("SAM mask geometry", () => {
   });
 
   it.each([
-    ["coordinates from a different frame size", SAM_TEXT.replace("w=1280", "w=640")],
-    ["a box with no frame size", SAM_TEXT.replace(";w=1280;h=720", "")],
+    ["coordinates from a different frame size", SAM_TEXT.replace("w=1600", "w=640")],
+    ["a box with no frame size", SAM_TEXT.replace(";w=1600;h=1200", "")],
     ["one good record beside a damaged line", `${SAM_TEXT}<1f>broken\n`],
     ["a raster that does not match its box", SAM_TEXT.replace("x2=270", "x2=280")],
     ["truncated output", SAM_TEXT.slice(0, SAM_TEXT.indexOf("data=") + 12)],
@@ -271,11 +271,11 @@ describe("SAM segmentation", () => {
     const body = sentBody();
     expect(body).toMatchObject({ model: "sam-3.1", store: false });
     expect(body.input[0].content[0]).toEqual({ type: "input_text", text: "discolored patch" });
-    expect(body.input[0].content[1].image_url).toMatch(/^data:image\/png;base64,/);
+    expect(body.input[0].content[1].image_url).toMatch(/^data:image\/jpeg;base64,/);
 
     const { segmentation } = parsed;
     expect(segmentation.boxes).toEqual([{ x: 211, y: 228, width: 60, height: 27 }]);
-    expect([segmentation.imageWidth, segmentation.imageHeight]).toEqual([1280, 720]);
+    expect([segmentation.imageWidth, segmentation.imageHeight]).toEqual([1600, 1200]);
     expect(segmentation.mask.format).toBe("alpha-png-data-url");
     expect(segmentation.provenance).toMatchObject({ source: "LIVE_META", provider: "meta", model: "sam-3.1", requestId: "req-1" });
     expect(segmentation.provenance.fixtureId).toBeUndefined();
@@ -289,7 +289,7 @@ describe("SAM segmentation", () => {
 
   it.each([
     ["text with no masks", metaReply("not a segmentation")],
-    ["a corrupt mask payload", metaReply("<0f>0<|box;x1=1;y1=1;x2=9;y2=9;w=1280;h=720|><|mask;x=0;y=0;data=9,9,~!!|>\n")],
+    ["a corrupt mask payload", metaReply("<0f>0<|box;x1=1;y1=1;x2=9;y2=9;w=1600;h=1200|><|mask;x=0;y=0;data=9,9,~!!|>\n")],
     ["a box outside the image", metaReply(SAM_TEXT.replace("x1=211", "x1=5000").replace("x2=270", "x2=5059"))],
     ["no message item", { status: "completed", output: [] }],
     ["the wrong shape", { unexpected: "shape" }],
