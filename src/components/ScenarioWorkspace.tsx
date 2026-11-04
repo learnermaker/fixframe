@@ -74,7 +74,11 @@ export function ScenarioWorkspace({ scenario, apiKey }: { scenario: Scenario; ap
           {segmentation && (
             <figcaption className="mt-2 space-y-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm text-slate">The highlighted region is a selection aid, not proof of a defect.</p>
+                <p className="text-sm text-slate">
+                  {segmentation.boxes.length > 0
+                    ? "The highlighted region is a selection aid, not proof of a defect."
+                    : "Nothing matched that description. Try different words."}
+                </p>
                 <button type="button" aria-pressed={overlayOn} onClick={() => setOverlayOn(!overlayOn)} className="border border-rule px-2 text-sm hover:bg-panel">
                   {overlayOn ? "Hide overlay" : "Show overlay"}
                 </button>
