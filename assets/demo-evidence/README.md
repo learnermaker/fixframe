@@ -2,7 +2,7 @@
 
 This directory is the provenance register for photographs considered for FixFrame's demo evidence scenarios.
 
-> **Important:** The source photographs are not yet vendored into this repository. This commit records the source and licensing information only. Do not reference these as local application assets until the corresponding image files have been downloaded, checked, and added here.
+> **Status (2026-11-04):** optimised derivatives of all four photographs are committed under `public/demo-assets/evidence/`, with fixture masks for three of them under `public/demo-assets/masks/`. They are **not yet referenced by any scenario** in the app. Originals are not committed (about 18 MB, and the ceiling original carries GPS EXIF); re-download them from the source links below and run `python assets/demo-evidence/build.py <dir>` to regenerate every derivative byte-for-byte checked against the SHA-256 values in that script.
 
 ## Intended demo candidates
 
@@ -46,7 +46,7 @@ These are real-world reference photographs used only as visual inputs for a demo
 
 - Keep source photographs unchanged as the original evidence. If a crop, resize, redaction, or other derivative is needed, preserve the original separately and document the derivative.
 - Store provenance alongside each image: source URL, creator, licence, retrieval date, local filename, and any modifications.
-- Do not add fictional site, asset, technician, or incident details to the photograph itself. Synthetic scenario metadata and transcripts must remain explicitly labelled as demo data.
+- Do not add fictional site, asset, technician, or incident details to the photograph itself. Scenario metadata and transcripts are authored for the demo and are not facts about the photographed asset.
 - Do not infer root cause, hidden damage, asset identity, structural integrity, electrical condition, safety status, or repair procedure from a photograph alone.
 - Keep all model-generated descriptions reviewable and require human confirmation before creating a work order.
 
@@ -61,4 +61,17 @@ These are real-world reference photographs used only as visual inputs for a demo
 
 ## Asset status
 
-At the time of this commit, this folder contains the provenance documentation only. The image binaries have not been added.
+Retrieved 2026-11-04. Changes made to each photograph: EXIF orientation applied, all EXIF/GPS metadata removed (ICC profile kept), resized so the long edge is 1600 px (Lanczos), saved as progressive JPEG, quality 82, 4:2:0. No cropping, colour correction or retouching. JPEG rather than WebP because Meta's supported image formats are not verified in `docs/META_API_NOTES.md`.
+
+| Local file (`public/demo-assets/evidence/`) | Original | Optimised | Fixture mask / box (x, y, w, h) | Used in app |
+|---|---|---|---|---|
+| `ceiling-water-damage.jpg` | 3264x2448, 1,134,902 B | 1600x1200, 271,114 B | `masks/ceiling-water-damage.png`, 480, 180, 569x469 | Not yet (planned: `water-ingress-01`) |
+| `industrial-pipes-corrosion.jpg` | 4848x3232, 3,765,150 B | 1600x1067, 412,707 B | `masks/industrial-pipes-corrosion.png`, 435, 533, 756x428 | Not yet (planned: new pipework scenario) |
+| `bridge-concrete-spalling.jpg` | 4912x7360, 12,854,220 B | 1068x1600, 357,897 B | `masks/bridge-concrete-spalling.png`, 407, 816, 190x632 | Not yet (planned: new concrete scenario) |
+| `bridge-corrosion-usgs.jpg` | 2988x1992, 719,222 B | 1600x1067, 332,225 B | none | No (kept as a secondary candidate) |
+
+Original download sources: the two Wikimedia files from `upload.wikimedia.org` (SHA-1 matches the Commons API); the USGS file from the "Original" link on its source page; the Unsplash file from the image CDN at its 4848x3232 original size.
+
+The fixture masks are authored demo fixtures, not model output and not ground truth: a colour test inside a hand-chosen region, then morphological clean-up (see `build.py`). Known imperfection: the pipework mask also covers the orange equipment nameplate beside the joint.
+
+The ceiling photograph's EXIF in the original contains GPS coordinates; they are not in the derivative. The photographs are not evidence of any FixFrame site, asset or incident. The damaged electrical enclosure photograph is still excluded.
