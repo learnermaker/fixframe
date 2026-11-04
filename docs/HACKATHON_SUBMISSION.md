@@ -31,11 +31,11 @@ FixFrame turns visual inspection evidence into human-verified maintenance work o
 
 The project demonstrates a complete workflow—**Observe → Understand → Verify → Act**—rather than stopping at image classification. It is designed around fictional sites and authored demo records, with credited photographs and illustrations used as visual inputs. It is a human-supervised demonstration, not an autonomous diagnostic or safety-certification system.
 
-## Public GitHub repository
+## Public GitHub repository and licensing
 
 https://github.com/learnermaker/fixframe
 
-**Important before submission:** the repository is public, but it currently has no top-level `LICENSE` file. Public visibility is not the same as an open-source licence. The hackathon says projects must be open source. Select and add a suitable project licence, after reviewing the custom licence of `@meta-sam/parser` and the separate third-party photo terms, before representing the repository as open source.
+The repository's original FixFrame source code and project documentation are licensed under MIT. This licence does not relicense third-party material. In particular, the `@meta-sam/parser` dependency is under Meta's separate SAM License, and the bundled demo photographs retain their individual licences (CC BY 3.0, Unsplash License, and CC BY 2.0). See [LICENSE](../LICENSE), [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md), and the [photo provenance register](../assets/demo-evidence/README.md). Do not describe third-party assets or dependencies as MIT-licensed.
 
 ## Three-minute demo video
 
@@ -117,12 +117,11 @@ Production decisions would depend on verified performance on representative real
 ## Final submission checklist
 
 - [ ] Confirm exact track and problem-statement dropdown selections.
-- [ ] Add a suitable top-level project licence after licence review.
-- [ ] Review the SAM parser's custom licence and all image attribution / reuse terms.
+- [ ] Verify the project licence and third-party exclusions are visible in the public repository.
+- [ ] Review the SAM parser's SAM License and all image attribution / reuse terms before redistributing a built application.
 - [ ] Confirm the repository is accessible while logged out.
 - [ ] Replace the video placeholder with the final public three-minute demo URL.
 - [ ] Watch the exported video and verify all live/fixture provenance claims.
 - [ ] Complete required subjective ratings honestly.
 - [ ] Review the event's permission to use, publish, share and promote submitted materials.
 - [ ] Submit before the stated deadline.
-
