@@ -15,7 +15,7 @@ export const SCENARIOS: readonly Scenario[] = [
     },
     transcript:
       "I noticed a discoloured patch on the ceiling tile near the north corridor. I don't know what caused it.",
-    segmentationPrompt: "discoloured ceiling tile",
+    segmentationPrompt: "discolored patch",
     expectedIssueId: "issue-demo-001",
   },
   {
@@ -31,7 +31,7 @@ export const SCENARIOS: readonly Scenario[] = [
     },
     transcript:
       "There is a visible mark on the cable covering at the training bench. This is a disconnected display prop for the demo.",
-    segmentationPrompt: "mark on cable sheath",
+    segmentationPrompt: "worn patch on cable",
     expectedIssueId: "issue-demo-002",
   },
   {
@@ -47,7 +47,7 @@ export const SCENARIOS: readonly Scenario[] = [
     },
     transcript:
       "The bracket on the mock handrail fixture looks out of alignment. Please review the training rig.",
-    segmentationPrompt: "handrail bracket",
+    segmentationPrompt: "bracket",
     expectedIssueId: "issue-demo-003",
   },
 ].map((scenario) => ScenarioSchema.parse(scenario));

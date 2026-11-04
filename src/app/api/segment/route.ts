@@ -1,10 +1,8 @@
-import { getFixtureSegmentation } from "../../../data/fixtures";
 import { SegmentRequestSchema } from "../../../lib/contracts";
-import { fixtureRoute } from "../_fixtureRoute";
+import { providerRoute } from "../../../server/providers/route";
 
 export function POST(request: Request) {
-  return fixtureRoute(request, SegmentRequestSchema, (scenario) => {
-    const segmentation = getFixtureSegmentation(scenario.id);
-    return segmentation && { segmentation };
-  });
+  return providerRoute(request, SegmentRequestSchema, "segmentation", (providers, scenario, body) =>
+    providers.segmentation.segment(scenario, body.prompt),
+  );
 }

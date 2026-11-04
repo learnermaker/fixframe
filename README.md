@@ -52,7 +52,7 @@ The initial product and engineering specification is being established. See:
 
 ## Setup
 
-Needs Node 20.9 or newer (CI uses 24). The demo needs no API credentials.
+Needs Node 20.15 or newer (CI uses 24). The demo needs no API credentials.
 
 ```bash
 npm ci
@@ -63,7 +63,7 @@ npm start
 
 Open http://localhost:3000. `npm run dev` runs the development server instead.
 
-`FIXFRAME_PROVIDER_MODE` picks where results come from. `fixture` returns the labelled demo data in this repository and calls no model. `live` is for Meta's models, and this build has no live provider yet, so it answers `UNCONFIGURED` rather than falling back to demo data.
+`FIXFRAME_PROVIDER_MODE` picks where results come from. `fixture` returns the labelled demo data in this repository and calls no model. `live` calls SAM 3.1 and Muse Spark 1.3 with `META_API_TOKEN`, or with a key the user enters for their session. With neither it answers `UNCONFIGURED`. It never falls back to demo data, and any mode other than `fixture` counts as live.
 
 Checks: `npm run lint`, `npm run typecheck`, `npm test`. The acceptance and browser suites live in `tests/`; see [tests/README.md](tests/README.md).
 

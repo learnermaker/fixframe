@@ -1,10 +1,6 @@
-import { getFixtureIssue } from "../../../data/fixtures";
 import { ExtractRequestSchema } from "../../../lib/contracts";
-import { fixtureRoute } from "../_fixtureRoute";
+import { providerRoute } from "../../../server/providers/route";
 
 export function POST(request: Request) {
-  return fixtureRoute(request, ExtractRequestSchema, (scenario) => {
-    const issue = getFixtureIssue(scenario.id);
-    return issue && { issue };
-  });
+  return providerRoute(request, ExtractRequestSchema, "issue", (providers, scenario) => providers.extraction.extract(scenario));
 }
