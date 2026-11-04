@@ -1,0 +1,29 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Runtime / build
+node_modules/
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+.next/
+coverage/
+*.log
+
+# Local data and editor files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
