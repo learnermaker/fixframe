@@ -52,7 +52,20 @@ The initial product and engineering specification is being established. See:
 
 ## Setup
 
-The runnable app scaffold and exact setup commands will be added after the initial stack selection. The intended baseline must run from a clean clone without API credentials using explicitly labelled demo fixtures.
+Needs Node 20.9 or newer (CI uses 24). The demo needs no API credentials.
+
+```bash
+npm ci
+cp .env.example .env
+npm run build
+npm start
+```
+
+Open http://localhost:3000. `npm run dev` runs the development server instead.
+
+`FIXFRAME_PROVIDER_MODE` picks where results come from. `fixture` returns the labelled demo data in this repository and calls no model. `live` is for Meta's models, and this build has no live provider yet, so it answers `UNCONFIGURED` rather than falling back to demo data.
+
+Checks: `npm run lint`, `npm run typecheck`, `npm test`. The acceptance and browser suites live in `tests/`; see [tests/README.md](tests/README.md).
 
 ## License
 

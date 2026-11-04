@@ -1,6 +1,5 @@
 import { z } from "zod";
 import {
-  EvidenceRefSchema,
   IssueSchema,
   type Issue,
   type Provenance,

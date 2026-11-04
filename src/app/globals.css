@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --color-concrete: #e3e6e4;
+  --color-panel: #f6f7f5;
+  --color-graphite: #22303a;
+  --color-slate: #55646e;
+  --color-rule: #bcc4c2;
+  --color-tag: #f3d65c;
+  --color-tag-deep: #8a6d00;
+  --color-marker: #c81e78;
+  --color-signal: #1a5ea8;
+  --color-alarm: #a32a12;
+  --font-sans: var(--font-barlow), system-ui, sans-serif;
+  --font-display: var(--font-barlow-condensed), var(--font-barlow), system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-concrete);
+  color: var(--color-graphite);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+/* The work order reads as a hanging job tag: a punched eyelet and clipped top corners. */
+.job-tag {
+  position: relative;
+  clip-path: polygon(44px 0, calc(100% - 44px) 0, 100% 44px, 100% 100%, 0 100%, 0 44px);
+}
+
+.job-tag::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin-left: -12px;
+  border-radius: 50%;
+  background: var(--color-concrete);
+  box-shadow: 0 0 0 4px var(--color-tag-deep);
+}

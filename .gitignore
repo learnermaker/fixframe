@@ -27,3 +27,7 @@ coverage/
 .idea/
 *.swp
 *.swo
+next-env.d.ts
+*.tsbuildinfo
+test-results/
+playwright-report/
