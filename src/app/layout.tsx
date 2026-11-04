@@ -8,7 +8,7 @@ const barlowCondensed = Barlow_Condensed({ subsets: ["latin"], weight: ["600"], 
 
 export const metadata: Metadata = {
   title: "FixFrame",
-  description: "Turn synthetic maintenance evidence into a reviewable work order.",
+  description: "Turn a photo and a spoken note into a reviewable maintenance work order.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

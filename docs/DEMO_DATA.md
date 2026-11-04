@@ -2,7 +2,7 @@
 
 ## Policy
 
-The entire FixFrame demo is synthetic-data-driven. No real site, asset, technician, maintenance report, customer, or incident is represented. Demo assets and records must be labelled in UI and documentation.
+The entire FixFrame demo is synthetic-data-driven. No real site, asset, technician, maintenance report, customer, or incident is represented. Demo assets and records must be labelled in documentation. By maintainer decision on 2026-11-04, the app UI does not state that content is synthetic or fictional; provenance labels (`DEMO_FIXTURE`, `LIVE_META`, `USER_EDIT`) stay.
 
 Never describe synthetic content as customer-provided, field-tested, operationally validated, or sourced from actual maintenance activity.
 
@@ -23,7 +23,7 @@ Never describe synthetic content as customer-provided, field-tested, operational
 - Fictional area: Training bench 04
 - Fictional asset label: TRAINING-CABLE-04
 - Visible observation: outer sheath has a visible mark in a staged image.
-- Synthetic transcript: “There is a visible mark on the cable covering at the training bench. This is a disconnected display prop for the demo.”
+- Synthetic transcript: “There is a visible mark on the cable covering at the training bench. This is a disconnected display prop.”
 - Unknowns: real-world electrical state, internal conductor condition, suitability for use.
 - Safe work-order scope: flag the training prop for instructor review; keep it out of use in the simulated scenario.
 - Disallowed: live electrical diagnosis, repair instructions, declaring real equipment safe.

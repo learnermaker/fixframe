@@ -1,6 +1,6 @@
 # Demo asset inventory
 
-Every image is a synthetic illustration authored for FixFrame as hand-written SVG. None derives from a photograph, a stock library, a real site, a real person, or a logo. Each visible image carries a `SYNTHETIC DEMO IMAGE` label.
+Every image is a synthetic illustration authored for FixFrame as hand-written SVG. None derives from a photograph, a stock library, a real site, a real person, or a logo.
 
 Licence: released by the FixFrame project under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) so they can be redistributed with the repository whichever code licence is selected. This is a project decision for the maintainer to confirm before public release.
 
@@ -17,7 +17,7 @@ The masks are authored by hand from the same outlines as the illustrations. They
 
 ## Regenerating the PNGs
 
-Only needed after editing an SVG. The renderer ([resvg](https://github.com/RazrFalcon/resvg), MPL-2.0) is a build-time tool and is not shipped or added to `package.json`. The `SYNTHETIC DEMO IMAGE` label uses a system Arial-compatible font, so text pixels can differ between machines; the committed PNGs are the canonical versions.
+Only needed after editing an SVG. The renderer ([resvg](https://github.com/RazrFalcon/resvg), MPL-2.0) is a build-time tool and is not shipped or added to `package.json`. The committed PNGs are the canonical versions.
 
 ```bash
 npm i --no-save @resvg/resvg-js

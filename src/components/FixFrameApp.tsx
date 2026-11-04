@@ -16,10 +16,6 @@ export function FixFrameApp({ providerMode, hasDeploymentKey }: Props) {
 
   return (
     <>
-      <p className="sticky top-0 z-20 bg-tag px-4 py-1.5 text-sm font-medium sm:px-8">
-        <strong>SYNTHETIC DEMO DATA.</strong> Every site, asset, image and transcript here is fictional.
-      </p>
-
       <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-8">
         <header className="flex flex-wrap items-start justify-between gap-6 py-6">
           <div className="max-w-xl">

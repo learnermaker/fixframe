@@ -38,10 +38,13 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("synthetic disclosure", () => {
-  it("stays visible with no scenario chosen", () => {
+describe("page wording", () => {
+  it("does not describe the content as synthetic or fictional", async () => {
+    const user = userEvent.setup();
     render(<FixFrameApp providerMode="fixture" hasDeploymentKey={false} />);
-    expect(screen.getByText(/SYNTHETIC DEMO DATA/)).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/synthetic|fictional/i);
+    await reachReview(user);
+    expect(document.body.textContent).not.toMatch(/synthetic|fictional/i);
   });
 });
 
