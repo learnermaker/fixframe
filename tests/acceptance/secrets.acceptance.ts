@@ -5,7 +5,7 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startApp, post, type RunningApp } from "../support/app";
 import { startFakeMeta, type FakeMeta } from "../support/fake-meta";
-import { SENTINEL_TOKEN } from "../support/constants";
+import { BYOK_HEADER, SENTINEL_BYOK, SENTINEL_TOKEN } from "../support/constants";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
 function* walk(dir: string): Generator<string> {
@@ -24,22 +24,29 @@ describe("secrets", () => {
   });
   afterAll(async () => { await app?.stop(); await fake?.close(); });
 
-  it("served HTML, JS chunks, API responses and server logs never contain the token", async () => {
+  it("served HTML, JS chunks, API responses and server logs never contain the deployment key or a BYOK key", async () => {
+    const secrets = [SENTINEL_TOKEN, SENTINEL_BYOK];
+    const clean = (text: string) => { for (const s of secrets) expect(text).not.toContain(s); };
     const html = await (await fetch(app.url)).text();
     const chunks = [...html.matchAll(/(?:src|href)="(\/_next\/[^"]+\.js[^"]*)"/g)].map((m) => m[1]!);
     expect(chunks.length, "no client JS chunks found in served HTML").toBeGreaterThan(0);
-    for (const c of chunks) expect(await (await fetch(app.url + c)).text()).not.toContain(SENTINEL_TOKEN);
-    expect(html).not.toContain(SENTINEL_TOKEN);
+    for (const c of chunks) clean(await (await fetch(app.url + c)).text());
+    clean(html);
     for (const [route, body] of [["segment", { scenarioId: "water-ingress-01", prompt: "x" }], ["extract", { scenarioId: "water-ingress-01" }]] as const) {
-      expect((await post(app, route, body)).text).not.toContain(SENTINEL_TOKEN);
+      clean((await post(app, route, body)).text);
+      clean((await post(app, route, body, { [BYOK_HEADER]: SENTINEL_BYOK })).text);
     }
-    expect(app.logs()).not.toContain(SENTINEL_TOKEN);
+    clean(app.logs());
   });
 
-  it("built client assets contain no token (CI builds with the sentinel in the environment)", () => {
+  it("built client assets contain no key (CI builds with the sentinel in the environment)", () => {
     const dir = path.join(ROOT, ".next/static");
     expect(existsSync(dir), "run `npm run build` first").toBe(true);
-    for (const f of walk(dir)) expect(readFileSync(f, "utf8"), f).not.toContain(SENTINEL_TOKEN);
+    for (const f of walk(dir)) {
+      const text = readFileSync(f, "utf8");
+      expect(text, f).not.toContain(SENTINEL_TOKEN);
+      expect(text, f).not.toContain(SENTINEL_BYOK);
+    }
   });
 
   it("no env file other than .env.example is tracked, and it holds no secret values or NEXT_PUBLIC_ credentials", () => {
