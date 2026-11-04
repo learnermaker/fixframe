@@ -32,5 +32,4 @@
   <use href="#bracket" transform="translate(640 318) rotate(14)"/>
   <!-- Rail -->
   <rect x="-10" y="222" width="1300" height="44" rx="6" fill="url(#rail)"/>
-  <text x="1262" y="704" text-anchor="end" font-family="Arial, sans-serif" font-size="18" fill="#222">SYNTHETIC DEMO IMAGE</text>
 </svg>

@@ -16,10 +16,6 @@ export function FixFrameApp({ providerMode, hasDeploymentKey }: Props) {
 
   return (
     <>
-      <p className="sticky top-0 z-20 bg-tag px-4 py-1.5 text-sm font-medium sm:px-8">
-        <strong>SYNTHETIC DEMO DATA.</strong> Every site, asset, image and transcript here is fictional.
-      </p>
-
       <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-8">
         <header className="flex flex-wrap items-start justify-between gap-6 py-6">
           <div className="max-w-xl">
@@ -48,7 +44,7 @@ export function FixFrameApp({ providerMode, hasDeploymentKey }: Props) {
                 onClick={() => setScenarioId(s.id)}
                 className={`flex items-center gap-3 border-2 bg-panel p-2 text-left hover:border-graphite ${s.id === scenarioId ? "border-graphite" : "border-transparent"}`}
               >
-                <Image src={s.image.path} alt="" width={96} height={54} unoptimized className="shrink-0" />
+                <Image src={s.image.path} alt="" width={96} height={54} unoptimized className="h-[54px] w-24 shrink-0 object-cover" />
                 <span>
                   <span className="block font-semibold leading-tight">{s.title}</span>
                   <span className="block text-sm text-slate">{s.site}</span>

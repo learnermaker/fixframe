@@ -2,7 +2,7 @@
 
 This directory is the provenance register for photographs considered for FixFrame's demo evidence scenarios.
 
-> **Status (2026-11-04):** optimised derivatives of all four photographs are committed under `public/demo-assets/evidence/`, with fixture masks for three of them under `public/demo-assets/masks/`. They are **not yet referenced by any scenario** in the app. Originals are not committed (about 18 MB, and the ceiling original carries GPS EXIF); re-download them from the source links below and run `python assets/demo-evidence/build.py <dir>` to regenerate every derivative byte-for-byte checked against the SHA-256 values in that script.
+> **Status (2026-11-04):** optimised derivatives of all four photographs are committed under `public/demo-assets/evidence/`, with fixture masks for three of them under `public/demo-assets/masks/`. Three are used by scenarios, as the table under "Asset status" shows.
 
 ## Intended demo candidates
 
@@ -65,9 +65,9 @@ Retrieved 2026-11-04. Changes made to each photograph: EXIF orientation applied,
 
 | Local file (`public/demo-assets/evidence/`) | Original | Optimised | Fixture mask / box (x, y, w, h) | Used in app |
 |---|---|---|---|---|
-| `ceiling-water-damage.jpg` | 3264x2448, 1,134,902 B | 1600x1200, 271,114 B | `masks/ceiling-water-damage.png`, 480, 180, 569x469 | Not yet (planned: `water-ingress-01`) |
-| `industrial-pipes-corrosion.jpg` | 4848x3232, 3,765,150 B | 1600x1067, 412,707 B | `masks/industrial-pipes-corrosion.png`, 435, 533, 756x428 | Not yet (planned: new pipework scenario) |
-| `bridge-concrete-spalling.jpg` | 4912x7360, 12,854,220 B | 1068x1600, 357,897 B | `masks/bridge-concrete-spalling.png`, 407, 816, 190x632 | Not yet (planned: new concrete scenario) |
+| `ceiling-water-damage.jpg` | 3264x2448, 1,134,902 B | 1600x1200, 271,114 B | `masks/ceiling-water-damage.png`, 480, 180, 569x469 | `water-ingress-01` |
+| `industrial-pipes-corrosion.jpg` | 4848x3232, 3,765,150 B | 1600x1067, 412,707 B | `masks/industrial-pipes-corrosion.png`, 435, 533, 756x428 | `pipework-corrosion-04` |
+| `bridge-concrete-spalling.jpg` | 4912x7360, 12,854,220 B | 1068x1600, 357,897 B | `masks/bridge-concrete-spalling.png`, 407, 816, 190x632 | `concrete-spalling-05` |
 | `bridge-corrosion-usgs.jpg` | 2988x1992, 719,222 B | 1600x1067, 332,225 B | none | No (kept as a secondary candidate) |
 
 Original download sources: the two Wikimedia files from `upload.wikimedia.org` (SHA-1 matches the Commons API); the USGS file from the "Original" link on its source page; the Unsplash file from the image CDN at its 4848x3232 original size.

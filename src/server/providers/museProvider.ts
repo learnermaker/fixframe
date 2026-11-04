@@ -49,7 +49,7 @@ const issueSchema = (scenario: Scenario) => {
 
 const instructions = (scenario: Scenario) =>
   [
-    "Draft a maintenance issue for a person to review, from this synthetic photo and the note below.",
+    "Draft a maintenance issue for a person to review, from this photo and the note below.",
     "Describe only what is visible or stated. Do not state a cause or diagnosis, and do not say whether anything is safe.",
     "Do not repeat the site, area or asset in the title or description. FixFrame adds those itself.",
     "List what cannot be known from this evidence under unknowns. Urgency is a workflow label, not a safety rating.",

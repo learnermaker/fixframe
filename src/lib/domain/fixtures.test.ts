@@ -15,14 +15,30 @@ function readPng(publicPath: string) {
   return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20), colourType: bytes[25] };
 }
 
+/** Width and height from a JPEG's start-of-frame marker. */
+function readJpegSize(publicPath: string) {
+  const bytes = readFileSync(join(process.cwd(), "public", publicPath));
+  for (let at = 2; at < bytes.length; at += 2 + bytes.readUInt16BE(at + 2)) {
+    const marker = bytes[at + 1]!;
+    if (marker >= 0xc0 && marker <= 0xc2) return { width: bytes.readUInt16BE(at + 7), height: bytes.readUInt16BE(at + 5) };
+  }
+  throw new Error(`no frame marker in ${publicPath}`);
+}
+
 const required = <T>(value: T | undefined): T => {
   if (value === undefined) throw new Error("missing fixture");
   return value;
 };
 
 describe("scenario catalog", () => {
-  it("holds the three documented scenarios, all synthetic", () => {
-    expect(SCENARIOS.map((s) => s.id)).toEqual(["water-ingress-01", "cable-sheath-02", "handrail-bracket-03"]);
+  it("holds the documented scenarios, all with authored metadata", () => {
+    expect(SCENARIOS.map((s) => s.id)).toEqual([
+      "water-ingress-01",
+      "cable-sheath-02",
+      "handrail-bracket-03",
+      "pipework-corrosion-04",
+      "concrete-spalling-05",
+    ]);
     expect(SCENARIOS.every((s) => s.synthetic)).toBe(true);
     expect(getScenario("nope")).toBeUndefined();
   });
@@ -79,8 +95,14 @@ describe.each(SCENARIOS.map((s) => [s.id, s] as const))("fixtures for %s", (id, 
     expect(text.flatMap(findUnsafeClaims)).toEqual([]);
   });
 
+  it("credit every photograph", () => {
+    if (scenario.image.path.endsWith(".jpg")) expect(scenario.image.credit).toBeDefined();
+  });
+
   it("point at committed assets of the declared size", () => {
-    expect(readPng(scenario.image.path)).toMatchObject({ width: 1280, height: 720 });
+    const { path, width, height } = scenario.image;
+    expect(path.endsWith(".jpg") ? readJpegSize(path) : readPng(path)).toMatchObject({ width, height });
+    expect([segmentation.imageWidth, segmentation.imageHeight]).toEqual([width, height]);
     expect(readPng(segmentation.mask.value)).toEqual({
       width: segmentation.imageWidth,
       height: segmentation.imageHeight,

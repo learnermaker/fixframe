@@ -2,7 +2,7 @@
 
 ## Policy
 
-The entire FixFrame demo is synthetic-data-driven. No real site, asset, technician, maintenance report, customer, or incident is represented. Demo assets and records must be labelled in UI and documentation.
+Every site, asset, technician, maintenance report, customer and incident in the FixFrame demo is fictional. Most scenarios use real third-party photographs, recorded in `assets/demo-evidence/README.md`, as visual inputs only: they are not evidence of a FixFrame site or incident. Demo assets and records must be labelled in documentation. By maintainer decision on 2026-11-04, the app UI does not state that content is synthetic or fictional; provenance labels (`DEMO_FIXTURE`, `LIVE_META`, `USER_EDIT`) stay.
 
 Never describe synthetic content as customer-provided, field-tested, operationally validated, or sourced from actual maintenance activity.
 
@@ -23,7 +23,7 @@ Never describe synthetic content as customer-provided, field-tested, operational
 - Fictional area: Training bench 04
 - Fictional asset label: TRAINING-CABLE-04
 - Visible observation: outer sheath has a visible mark in a staged image.
-- Synthetic transcript: “There is a visible mark on the cable covering at the training bench. This is a disconnected display prop for the demo.”
+- Synthetic transcript: “There is a visible mark on the cable covering at the training bench. This is a disconnected display prop.”
 - Unknowns: real-world electrical state, internal conductor condition, suitability for use.
 - Safe work-order scope: flag the training prop for instructor review; keep it out of use in the simulated scenario.
 - Disallowed: live electrical diagnosis, repair instructions, declaring real equipment safe.
@@ -38,6 +38,26 @@ Never describe synthetic content as customer-provided, field-tested, operational
 - Unknowns: load capacity, structural condition, suitability outside the demo.
 - Safe work-order scope: mark mock rig for instructor inspection.
 - Disallowed: structural safety certification or repair instructions.
+
+## Scenario D — Pipe joint corrosion
+- ID: `pipework-corrosion-04`
+- Fictional site: Demo Plant C
+- Fictional area: Plant room 2
+- Fictional asset label: PIPE-JOINT-04
+- Image: third-party photograph.
+- Authored transcript: “There is visible corrosion around this pipe joint. Please have the maintenance team inspect it.”
+- Unknowns: source, condition inside the pipe, extent, safety status.
+- Disallowed: root-cause claims, safety certification, repair instructions.
+
+## Scenario E — Concrete deterioration
+- ID: `concrete-spalling-05`
+- Fictional site: Demo Structure D
+- Fictional area: Support column 5
+- Fictional asset label: CONCRETE-COLUMN-05
+- Image: third-party photograph.
+- Authored transcript: “There is visible deterioration on this concrete surface. Please arrange an inspection.”
+- Unknowns: source, depth, structural condition, safety status.
+- Disallowed: structural certification, root-cause claims, repair instructions.
 
 ## Asset requirements
 

@@ -31,7 +31,6 @@ test("synthetic scenario to tracked work order, with provenance kept distinct", 
   await expect(page.getByText("Synthetic reviewer note.")).toBeVisible();
   expect(await ui.timeline(page).getByRole("listitem").count()).toBeGreaterThanOrEqual(before + 3);
 
-  // Disclosure stays visible to the end; nothing claims live output.
-  await expect(ui.banner(page)).toBeVisible();
+  // Nothing claims live output.
   await expect(page.getByText(LIVE_LABEL)).toHaveCount(0);
 });

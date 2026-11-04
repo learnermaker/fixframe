@@ -3,7 +3,6 @@ import { expect, type Page } from "@playwright/test";
 // Accessible-name expectations for Workstream A's UI. Documented in tests/README.md;
 // if A's labels differ, adjust here (one place) after agreeing with A.
 export const ui = {
-  banner: (p: Page) => p.getByText(/SYNTHETIC DEMO DATA/i).first(),
   scenario: (p: Page) => p.getByRole("button", { name: /ceiling tile/i }).first(),
   segment: (p: Page) => p.getByRole("button", { name: /segment|run sam/i }),
   extract: (p: Page) => p.getByRole("button", { name: /extract|muse spark/i }),
@@ -27,7 +26,6 @@ export const USER_EDIT_LABEL = /USER[_ ]EDIT/i;
 /** Walk the narrated path up to (not including) confirmation. */
 export async function reachReview(page: Page) {
   await page.goto("/");
-  await expect(ui.banner(page)).toBeVisible();
   await ui.scenario(page).click();
   await ui.segment(page).click();
   await expect(page.getByText(FIXTURE_LABEL).first()).toBeVisible();

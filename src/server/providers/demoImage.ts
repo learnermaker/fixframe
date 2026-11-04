@@ -2,12 +2,14 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { Scenario } from "../../lib/contracts";
 
-/** The scenario's PNG as Meta's input part, plus its size from the IHDR chunk. */
+/** The scenario's committed image as Meta's input part, plus its size. */
 export async function loadScenarioImage(scenario: Scenario) {
-  const png = await readFile(path.join(process.cwd(), "public", scenario.image.path));
+  const { path: publicPath, width, height } = scenario.image;
+  const bytes = await readFile(path.join(process.cwd(), "public", publicPath));
+  const mime = publicPath.endsWith(".jpg") ? "image/jpeg" : "image/png";
   return {
-    width: png.readUInt32BE(16),
-    height: png.readUInt32BE(20),
-    part: { type: "input_image", image_url: `data:image/png;base64,${png.toString("base64")}` },
+    width,
+    height,
+    part: { type: "input_image", image_url: `data:${mime};base64,${bytes.toString("base64")}` },
   };
 }
