@@ -1,57 +1,67 @@
-# QA Report — Workstream D
+# QA Report — Workstream D and integration-owner review
 
-Branch `agent/qa-release`, based on `main` @ `c41d3c9`. Date: 2026-11-04. Host: Windows 11, Node 24.21.0, npm 11.19.0.
+Date: 2026-11-04. This report supersedes the initial branch-state snapshot in PR #7.
 
-## Headline
+## Current repository state
 
-**The FixFrame application does not exist on `main` or on any pushed agent branch yet** (all four branches pointed at `c41d3c9`, docs only, when checked after `git fetch`). Therefore:
+- Workstream C merged in [PR #6](https://github.com/learnermaker/fixframe/pull/6).
+- Workstream D merged in [PR #7](https://github.com/learnermaker/fixframe/pull/7).
+- Maintainer accepted [ADR 0001](decisions/0001-domain-contract-transport.md) and added [ADR 0002 — BYOK](decisions/0002-byok-meta-api-key.md).
+- The repository contains domain contracts, three synthetic scenarios, fixtures, assets, workflow logic and QA harness.
+- **The runnable Next.js application and Meta provider routes are not yet present on `main`.** No open PRs were visible at the latest integration review.
+- The root `package.json` currently has only `test` and `typecheck` scripts. The CI-required `lint`, `build` and `start` scripts are absent, so CI is not yet expected to pass.
 
-- **No test in this report has been run against the real app.** The app-facing suites are written against the frozen contract in `AGENT_WORKSTREAMS.md` and are unverified against A/B/C code.
-- **CI on this PR will be red** until the root `package.json` with `lint`, `typecheck`, `test`, `build`, `start` scripts and the app land. That is intentional; the workflow has no "skip if empty" guard that would fake a green.
-- No live Meta call was made; no credentials were available or used.
+## Evidence actually reported by Workstream C
 
-## Commands actually executed
+C's PR reports:
+- `npx vitest run`: 107 tests passed across 4 files.
+- `npx tsc --noEmit`: clean.
+- Synthetic illustrations visually inspected.
 
-| # | Command (where) | Result |
-|---|---|---|
-| 1 | `git fetch --all --prune`; `git log origin/<branch>` for main, agent/frontend, agent/meta-providers, agent/domain-data, agent/qa-release | All at `c41d3c9` — no app code pushed |
-| 2 | `npm install` in `tests/` | OK, 0 vulnerabilities |
-| 3 | `npm run typecheck` in `tests/` (tsc, strict) | **PASS** |
-| 4 | `npm run e2e:list` in `tests/` | **PASS** — 7 Playwright tests discovered/compiled (listing only, **not executed**) |
-| 5 | `npm run acceptance` in `tests/` with `FIXFRAME_START_CMD` pointing at a throwaway stub I wrote (scratchpad, not committed) that implements the documented API contract | 25/25 passed. **This validates the harness only; it says nothing about the real app.** |
-| 6 | Negative control: same suite, stub modified to silently fall back to fixture data in live mode | `live-failures`: 12 of 12 tests failed, i.e. the hidden-fallback assertions can fail |
-| 7 | History scan: `git log --all -p` piped through a regex for common key/token/private-key patterns | No matches in the 5 existing commits (docs only). Regex scan is not a substitute for gitleaks/trufflehog |
-| 8 | Fresh clone of `main`, `npm ci` | **FAIL (expected)**: no `package.json` — README still says setup commands "will be added" |
-| 9 | Fresh clone of `agent/qa-release`; `npm ci`, `npm run typecheck`, `npm run e2e:list` inside `tests/` | PASS / PASS / PASS (7 tests listed). Same clone: `npm run acceptance` fails with `app exited before becoming ready ... ENOENT package.json` — loud failure, as designed |
-| 10 | `npm view <pkg> license` for the test devDependencies | @playwright/test Apache-2.0, vitest MIT, typescript Apache-2.0, @types/node MIT |
+These results are agent-reported in PR #6; the integration owner has not independently run them in this environment. Lint, Next.js production build, UI integration, and live Meta calls were not run.
 
-Not run: `npm run lint`, `npm test` (root), `npm run build`, Playwright execution, any browser run, any live-provider call. The root scripts do not exist.
+## Evidence actually reported by Workstream D
 
-## What the tests cover (and the acceptance matrix)
+D's PR reports:
+- Test harness TypeScript check passed.
+- Seven Playwright tests were discovered/compiled, not executed.
+- Acceptance harness: 25/25 passed against a throwaway stub implementing the documented API contract.
+- Negative control: hidden fixture fallback caused the live-failure tests to fail as intended.
+- Fresh clone of the D branch and test-package install/typecheck/listing passed.
+- Root clean-clone install failed because the app package was not present at the time of that test.
 
-| ID | Coverage | Status |
-|---|---|---|
-| A1 clean clone, no keys -> fixture mode | `tests/playwright.config.ts` starts app with explicit `fixture` + empty token | Written, not run on app |
-| A2 scenario shows image/transcript/metadata | E2E selects scenario; asset/location asserted via API | Partial; image/transcript content not asserted |
-| A3 fixture segmentation + provenance | `fixture-mode.acceptance.ts`, E2E | Written, harness-validated on stub only |
-| A4 fixture extraction schema-valid | `fixture-mode.acceptance.ts` asserts documented transport fields only; **no canonical Zod validation** (C's schema module not available, and D must not duplicate schemas) | Partial |
-| A5 edit -> `USER_EDIT` | `happy-path.e2e.ts` | Written, not run |
-| A6 create work order + gating | `gating-and-errors.e2e.ts`, `happy-path.e2e.ts` | Written, not run. Domain-level gating belongs to C's unit tests |
-| A7/A8 checklist, status, feedback, timeline | `happy-path.e2e.ts` | Written, not run |
-| A9 timeout -> clear error, no fallback | API: `live-failures` (hang -> `TIMEOUT`); UI: injected `TIMEOUT` | Written; API part harness-validated on stub |
-| A10 malformed output rejected, no work order | API: bad shape / non-JSON -> `INVALID_RESPONSE`; UI: 2 malformed variants | Same |
-| A11 live badge only after successful call | Negative half only (no `LIVE_META` on any failure). Positive half needs real credentials | **Untested** |
-| A12 keyboard navigation | Not automated | **Untested** |
-| Secrets in bundle/pages/responses/logs | `secrets.acceptance.ts` (needs build with sentinel token) | Written, harness-validated on stub (the bundle check used a dummy file) |
+These validate the test harness, not the real application. Do not describe the app as E2E-tested.
 
-## Untested / limitations
+## Current acceptance matrix
 
-- Everything against the real app (see headline).
-- Live SAM 3.1 / Muse Spark behaviour, coordinate decoding, empty masks, request IDs.
-- Whether B's timeout budget is short enough for CI: the `hang` test allows 300 s.
-- UI selectors in `tests/e2e/ui.ts` are my guess at A's accessible names; likely to need one round of adjustment.
-- Narrow-mobile layout, keyboard-only flow, persistence on refresh, accessibility audit.
-- Dependency licence review of the app (no app dependencies exist yet).
+| Area | Current state |
+|---|---|
+| Canonical Zod contracts and domain workflow | Merged; agent-reported unit tests |
+| Synthetic scenario fixtures and image/mask assets | Merged; source documented in `assets/README.md` |
+| Human confirmation gate | Implemented in domain reducer; needs UI E2E verification |
+| Frontend workspace | Not yet merged |
+| SAM 3.1 / Muse Spark routes | Not yet merged or live-tested |
+| BYOK | Security contract accepted in ADR 0002; implementation pending |
+| CI against app | Not yet possible; required root scripts/app are absent |
+| Playwright E2E against app | Written, not executed |
+| Secret non-disclosure | Harness tests exist; real app/bundle verification pending |
+| Accessibility/mobile checks | Not automated yet |
+| Public-release licence and notices | Pending maintainer decision and review |
 
-## Open requests to other workstreams
-See the table in `tests/README.md`. Main ones: root scripts (`lint`, `typecheck`, `test`, `build`, `start`), `FIXFRAME_PROVIDER_MODE` / `META_API_BASE_URL` semantics from B, and A's accessible names. No contract changes requested.
+## Required next verification
+
+1. Merge frontend and provider PRs only after contract/security review.
+2. Add root scripts `lint`, `typecheck`, `test`, `build`, and `start`; ensure the lockfile matches.
+3. Run clean-clone install, lint, typecheck, unit tests, production build, acceptance tests and Playwright E2E against the real app.
+4. Test fixture mode with no keys; test live-mode missing-key errors; test BYOK precedence and no-fallback behaviour using mocked upstreams.
+5. If valid credentials are available, run live SAM and Muse smoke tests against the synthetic assets and record exact results. If unavailable, state this plainly and do not claim live integration verified.
+6. Verify no key in browser bundles, HTML, responses, logs, URLs, storage, screenshots or git history. Run a dedicated history secret scanner after all agent commits.
+7. Confirm asset/code licensing, add `LICENSE` and third-party notices, then re-evaluate public visibility.
+
+## Known limitations
+
+- C's unsafe-claim filter is phrase-based, not a safety classifier.
+- Completion currently does not require all checklist items to be checked.
+- Fixture bounding boxes are not automatically tested against the masks.
+- The synthetic images are authored illustrations, not photographs; live model quality on them is unverified.
+- In-memory workflow state does not persist across refreshes.
