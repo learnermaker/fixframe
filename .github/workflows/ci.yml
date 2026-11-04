@@ -4,13 +4,19 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Actions below were checked to run on node24 (checkout@v6, setup-node@v6, upload-artifact@v6, cache@v5), supported by current GitHub-hosted runners.
 jobs:
-  # Full-history secret scan with the gitleaks CLI (all refs). Deliberately not the gitleaks-action: on pull_request
-  # it scans only the PR's commits and needs extra API permissions. The binary is pinned and checked against a hard-coded sha256.
+  # Full-history secret scan with the gitleaks CLI over all refs. Deliberately not gitleaks-action: on pull_request it scans
+  # only the PR's commits and needs extra API permissions. The binary is pinned and verified against a hard-coded sha256.
   secret-scan:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -28,14 +34,30 @@ jobs:
           tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP" gitleaks
       - name: Scan full git history (all refs)
         run: |
+          echo "commits reachable from any ref: $(git rev-list --all --count)"
           "$RUNNER_TEMP/gitleaks" git --no-banner --redact --verbose --log-opts="--all" .
-          git rev-list --all --count
 
-  verify:
+  # No build needed: fast feedback runs in parallel with the app job.
+  static:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
+  # Production build, then acceptance and Playwright against that build.
+  app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
-      # Fake value, not a credential. The build runs with it set so the secrets test can prove it never reaches client assets.
+      # Fake values, not credentials. Present at build time so the secrets test can prove they never reach client assets.
       META_API_TOKEN: FF_SENTINEL_TOKEN_do-not-leak-7f3a9c
       FIXFRAME_PROVIDER_MODE: fixture
     steps:
@@ -47,18 +69,25 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             tests/package-lock.json
-
       - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm test
       - run: npm run build
-
-      # Cross-workstream acceptance + E2E (see tests/README.md)
       - run: npm ci --prefix tests
       - run: npm run typecheck --prefix tests
       - run: npm run acceptance --prefix tests
-      - run: npx --prefix tests playwright install --with-deps chromium
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
+      - name: Install Playwright browser
+        run: |
+          if [ "${{ steps.pw-cache.outputs.cache-hit }}" = "true" ]; then
+            npx --prefix tests playwright install-deps chromium
+          else
+            npx --prefix tests playwright install --with-deps chromium
+          fi
       - run: npm run e2e --prefix tests
       - if: failure()
         uses: actions/upload-artifact@v6

@@ -1,41 +1,51 @@
 # FixFrame cross-workstream tests (Workstream D)
 
-Black-box tests that talk to the **built app** over HTTP/browser. They import no application code and define no schemas, so they cannot drift from Workstream C's contracts; they assert only the transport shape documented in `AGENT_WORKSTREAMS.md`.
-
-Own `package.json` on purpose: it adds no dependencies to the app's root `package.json` (owned by A/B/C).
+Black-box tests of the **production build** over HTTP and a real browser. They define no schemas: response shapes are validated with Workstream C's canonical schemas (`src/lib/contracts.ts`, imported not copied) and expected scenario data comes from `src/data/scenarios.ts`. The package has its own `package.json`, so it adds nothing to the app's dependencies.
 
 ## Run (from a clean clone)
 
 ```bash
-npm ci                           # root app deps
-npm run build                    # tests run against the production build
+npm ci                              # app deps
+META_API_TOKEN=FF_SENTINEL_TOKEN_do-not-leak-7f3a9c npm run build   # fake token at build time lets the secrets test mean something
 npm ci --prefix tests
 npx --prefix tests playwright install chromium
 npm run typecheck --prefix tests
-npm run acceptance --prefix tests   # API / failure-path / secrets (Vitest, starts its own app instances)
-npm run e2e --prefix tests          # browser happy path + gating + error UI (Playwright, fixture mode)
+npm run acceptance --prefix tests   # HTTP routes: fixture, live failures, BYOK, secrets (starts its own app instances)
+npm run e2e --prefix tests          # Playwright: desktop + mobile (fixture) and live-mode-against-a-mock (BYOK/UI states)
 ```
 
-For the secrets test to be meaningful, build with a fake token in the environment (CI does this):
-`META_API_TOKEN=FF_SENTINEL_TOKEN_do-not-leak-7f3a9c npm run build`.
+Needs Node 24 (the fake upstream process runs a `.ts` file directly). Do not run two builds in the same directory at once.
 
-## Requirements these tests place on other workstreams
+## Tiers (use the cheapest that covers your change)
 
-| From | Requirement |
-|---|---|
-| root `package.json` (A/B/C) | scripts `lint`, `typecheck`, `test`, `build`, `start` (`next start`, honours `PORT`) |
-| B | `FIXFRAME_PROVIDER_MODE=fixture|live`; live + empty `META_API_TOKEN` -> `UNCONFIGURED`; `META_API_BASE_URL` points live calls at the given host; upstream 429 -> `RATE_LIMITED`, 5xx -> `UPSTREAM_ERROR`, bad shape / non-JSON -> `INVALID_RESPONSE`, no answer -> `TIMEOUT`; bad body / unknown scenario -> `ok:false` with HTTP >= 400 |
-| B/C | fixture responses use `provenance.source = "DEMO_FIXTURE"`, `provider = "fixture"`, a `fixtureId`; extract returns `status: "needs_review"`, catalog `location`/`assetLabel`, non-empty `unknowns`, no numeric `confidence` |
-| B (ADR 0002) | both routes read `X-FixFrame-Meta-Key`, trim it, ignore it if blank, and use `requestKey ?? META_API_TOKEN` for that request only; a rejected key (upstream 401) returns `ok:false` (not `UNCONFIGURED`), is never retried with the deployment key, never falls back to fixtures; key never in responses, logs or upstream URLs; fixture mode ignores both keys |
-| A (ADR 0002) | password-masked input labelled *meta api key*/*api key*; buttons *Use for this session* and *Clear*; key kept in memory only (no storage/cookies/URL), sent only as the header above, cleared by Clear and by refresh |
-| A | accessible names listed in `e2e/ui.ts` (banner text `SYNTHETIC DEMO DATA`; buttons matching *ceiling tile*, *segment*, *extract*, *confirm*, *create work order*; labelled fields *title*, *urgency*, *status*, *feedback*; checkboxes for the checklist; a list named *timeline/audit/events*; errors rendered with `role="alert"`; provenance chips rendering `DEMO_FIXTURE` / `LIVE_META` / `USER_EDIT`). Tell D if the real labels differ and the selectors move in one file. |
+| Tier | When | Commands |
+|---|---|---|
+| 1 | Editing one test | `npx vitest run --config vitest.acceptance.config.ts byok` or `npx playwright test --config playwright.config.ts live-ui` (build once, reuse) |
+| 2 | Integration milestone | `npm run typecheck --prefix tests`, full `npm run acceptance --prefix tests`, root `npm run lint && npm run typecheck`, one `npm run build` |
+| 3 | Release | Clean clone, everything above plus `npm test`, full `npm run e2e --prefix tests`, the CI secret scan, licence review |
 
-## Scope and honesty notes
+## What runs where
 
-- `live-failures` uses a local fake upstream that **only misbehaves**. It proves failure handling, not compatibility with the real Meta API. Live smoke tests (acceptance A11) need real credentials and are not automated here.
-- Browser error-state tests inject failures with `page.route`; they test UI handling of the documented error contract.
-- Response shapes are validated with C's canonical schemas (`src/lib/contracts.ts`), imported rather than copied, so root `npm ci` must run first.
-- BYOK acceptance tests observe which bearer credential reaches a fake upstream. They do **not** cover "valid BYOK key returns normalized output" because that needs the real Meta response shape (B's to verify).
-- E2E runs in two Playwright projects: desktop 1280x800 and 375x812 (Chromium with a phone-sized viewport, not a real mobile browser).
-- Keyboard coverage is a focus/Enter pass over the narrated path plus a focus-indicator check, not a full keyboard audit or WCAG scan.
-- Not automated: persistence on refresh (documented limitation), WCAG audit, screenshots/recordings secret review, live smoke tests.
+| Suite | App under test | Upstream |
+|---|---|---|
+| `acceptance/fixture-mode`, `byok` (fixture case) | `FIXFRAME_PROVIDER_MODE=fixture` | none |
+| `acceptance/live-failures`, `live-success`, `byok`, `secrets` | live mode, per-test instance | local **mock** (`support/fake-meta.ts`) that records the bearer credential |
+| `e2e` projects `desktop-1280x800`, `mobile-375x812` | fixture mode, port 3100 | none |
+| `e2e` project `live-mock-desktop` (`byok`, `live-ui`) | live mode, port 3101, no deployment key | mock upstream process on port 3199 |
+
+**The mock is not Meta.** It speaks the documented Responses envelope that `src/server/providers/metaClient.ts` expects. It proves how our routes and UI treat well-formed, malformed, rejected and slow answers; it says nothing about real SAM / Muse Spark behaviour. SAM *success* decoding (real mask payloads) is not covered. `LIVE_META` appearing in a mock-backed test is not live verification.
+
+## Selector contract
+
+All accessible names are in `e2e/ui.ts`, taken from the real components (checked 2026-11-04). If a label changes, update that one file; do not loosen the assertions.
+
+## Known behaviours the tests encode (from the code, not from a spec)
+
+- HTTP status per error code: `UNCONFIGURED` 503, `TIMEOUT` 504, `RATE_LIMITED` 429, `UPSTREAM_ERROR` 502, `INVALID_RESPONSE` 502, `UNSUPPORTED_INPUT` 400, `SAFETY_REVIEW_REQUIRED` 422 (`src/server/providers/route.ts`).
+- Unset `FIXFRAME_PROVIDER_MODE` means **live**; fixtures need an explicit opt-in.
+- Upstream timeout is a fixed 60 s, so the two TIMEOUT tests take ~60 s (run concurrently).
+- The BYOK panel exists only in live mode.
+
+## Not automated
+
+Persistence on refresh (documented limitation), a WCAG audit, screenshot/recording secret review, real-device mobile, live Meta smoke tests.
