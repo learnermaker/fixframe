@@ -1,0 +1,10 @@
+title = "FixFrame gitleaks config"
+
+[extend]
+useDefault = true
+
+# Fake values that exist only to prove real keys never leak (tests/, CI env). They are not credentials.
+# Scoped by value, not by path, so a real secret placed in tests/ is still caught.
+[[allowlists]]
+description = "FF_SENTINEL_* fake test keys"
+regexes = ['''FF_SENTINEL_[A-Za-z0-9_-]+''']

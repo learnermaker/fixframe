@@ -6,6 +6,7 @@
     "typecheck": "tsc -p . --noEmit",
     "acceptance": "vitest run --config vitest.acceptance.config.ts",
     "e2e": "playwright test --config playwright.config.ts",
+    "live-smoke": "vitest run --config vitest.live.config.ts",
     "e2e:list": "playwright test --config playwright.config.ts --list"
   },
   "devDependencies": {
