@@ -6,6 +6,15 @@ Source of truth: `docs/SUBMISSION_CHECKLIST.md`, `docs/TEST_PLAN.md`, and the cu
 
 **Do not make the repository public yet.** Domain contracts, synthetic data, workflow logic and the QA harness are merged, but the runnable application and provider routes are not yet integrated. Build/test evidence against the real app is absent.
 
+## Update after QA revalidation (Workstream D)
+
+The recommendation is unchanged: **do not make the repository public.** The frontend and Meta provider code are still not on `main` (their branches are unchanged, no open PRs), so the app has not been built, run, or tested end to end. What *is* now evidenced from a clean clone: `npm ci`, `npm run typecheck` and `npm test` (107 tests) pass; `lint` and `build` scripts do not exist. BYOK, mobile, keyboard and secret-exposure tests are written but have only been exercised against a throwaway stub. **Live Meta integration is not verified**; no live smoke test has been run. See `docs/QA_REPORT.md`.
+
+Additional items found:
+- No dedicated secret scanner has run; a `secret-scan` CI job was added but has not yet produced a result.
+- Dependency licences (installed packages): MIT, Apache-2.0, ISC, BSD-3-Clause and 2 MPL-2.0 dev-only packages (`lightningcss`). Production runtime dependency so far is `zod` only. No `NOTICE`/third-party notices file yet; the maintainer must confirm the code and asset licence.
+- Screenshots/recordings cannot be secret-reviewed until they exist.
+
 ## Current blockers
 
 | # | Blocker | Owner |
