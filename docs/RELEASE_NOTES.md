@@ -1,49 +1,51 @@
-# Release readiness — status as of 2026-11-04
+# Release readiness — 2026-11-04
 
-Source of truth: `docs/SUBMISSION_CHECKLIST.md`, `docs/TEST_PLAN.md`, and the current [QA report](QA_REPORT.md). The repository remains private.
+Evidence is in [QA_REPORT.md](QA_REPORT.md) (tested commit `724aa04` on `main` @ `11674ed`). The repository is **still private**; nothing here changes that.
 
-## Recommendation
+## Readiness, by decision
 
-**Do not make the repository public yet.** Domain contracts, synthetic data, workflow logic and the QA harness are merged, but the runnable application and provider routes are not yet integrated. Build/test evidence against the real app is absent.
-
-## Update after QA revalidation (Workstream D)
-
-The recommendation is unchanged: **do not make the repository public.** The frontend and Meta provider code are still not on `main` (their branches are unchanged, no open PRs), so the app has not been built, run, or tested end to end. What *is* now evidenced from a clean clone: `npm ci`, `npm run typecheck` and `npm test` (107 tests) pass; `lint` and `build` scripts do not exist. BYOK, mobile, keyboard and secret-exposure tests are written but have only been exercised against a throwaway stub. **Live Meta integration is not verified**; no live smoke test has been run. See `docs/QA_REPORT.md`.
-
-Additional items found:
-- No dedicated secret scanner has run; a `secret-scan` CI job was added but has not yet produced a result.
-- Dependency licences (installed packages): MIT, Apache-2.0, ISC, BSD-3-Clause and 2 MPL-2.0 dev-only packages (`lightningcss`). Production runtime dependency so far is `zod` only. No `NOTICE`/third-party notices file yet; the maintainer must confirm the code and asset licence.
-- Screenshots/recordings cannot be secret-reviewed until they exist.
-
-## Current blockers
-
-| # | Blocker | Owner |
+| Decision | Ready? | Why |
 |---|---|---|
-| 1 | Next.js application, API routes and root scripts (`lint`, `typecheck`, `test`, `build`, `start`) not yet integrated; CI cannot pass | Frontend/provider agent + integration owner |
-| 2 | README setup instructions still need to match a clean install of the final app | Integration owner after app merge |
-| 3 | Core E2E flow written but never executed against the real app; selectors may need adjustment | Frontend, then D |
-| 4 | Live SAM 3.1 and Muse Spark calls have not been smoke-tested | Provider agent / maintainer |
-| 5 | BYOK security contract accepted; implementation and tests pending | Frontend + provider agent |
-| 6 | No `LICENSE`; code/asset licensing and third-party notices need final maintainer review | Integration owner |
-| 7 | Dependency licence review for the final application is pending | D |
-| 8 | Dedicated full-history secret scan not run after agent code merges | D / integration owner |
+| **Demo / recording** | **Yes, in fixture mode. Yes for live mode with care.** | The full fixture flow passes browser tests at desktop and mobile width and is labelled throughout. A real Meta key worked end to end for one scenario on 2026-11-04. Fix UI items 1 and 4 first (below) or avoid re-running segmentation on camera. Say "fixture" unless a `LIVE_META` chip is on screen. |
+| **Hackathon submission** | **Nearly.** | Needs the maintainer's licence confirmation, a rotated key, the submission-form items in `SUBMISSION_CHECKLIST.md`, and a recorded demo. Do not claim live results beyond what was run (QA report §4). |
+| **Making the repository public** | **Not recommended yet.** | Blocked only by the items under "Before public release". None is large, but they are decisions and a cleanup, not code. |
 
-## Completed foundation
+## What is integrated
 
-- Workstream C merged: canonical Zod contracts, three synthetic scenarios, fixtures, authored PNG/SVG assets, evidence checks and workflow reducer.
-- Workstream D merged: CI workflow, black-box acceptance harness, Playwright E2E definitions, QA report and demo/release checklists.
-- ADR 0001 accepted; ADR 0002 defines session-only BYOK.
-- Repository is still private. No public release action has been taken.
+Frontend (scenario gallery, evidence workspace, review and confirm, work order, checklist, status, feedback, audit timeline, provenance chips, error and retry states), server routes with fixture and live providers (SAM 3.1, Muse Spark 1.3), session-only bring-your-own key, domain contracts and workflow, synthetic assets under CC0, hardened provider layer, CI with a full-history secret scan, and the acceptance, browser and manual live-smoke test suites.
 
-## Required release sequence
+## Verified (by me, on the tested commit) versus merely implemented
 
-1. Integrate frontend and Meta provider implementations against the accepted contracts and BYOK ADR.
-2. Ensure root package scripts and lockfile support a clean install, lint, typecheck, tests, production build and production start.
-3. Run D's acceptance suite and Playwright E2E against the real application; update QA report with actual results.
-4. Run live SAM and Muse smoke tests with synthetic inputs when credentials are available. Never represent mocked tests as live verification.
-5. Verify BYOK precedence, missing-key handling, no-fallback semantics and secret non-disclosure.
-6. Choose a source licence, confirm asset licence, add `LICENSE` and third-party notices.
-7. Run a dedicated secret scanner across full git history after all code merges; rotate any exposed credential.
-8. Verify README, demo recording, and submission description; only then make the repo public and verify logged-out access.
+| Area | Verified | Only implemented or agent-reported |
+|---|---|---|
+| Build, lint, typecheck, 191 unit tests, clean clone | Yes | |
+| Fixture flow, provenance, human-confirmation gate, audit timeline | Yes (Playwright, desktop and 375x812) | |
+| No hidden fallback; `UNCONFIGURED`; error codes and HTTP statuses | Yes (against a local mock upstream) | |
+| BYOK precedence, rejection, no retry with the deployment key, clear and refresh | Yes (mock upstream and browser) | |
+| Secret non-disclosure in bundles, HTML, responses, logs, URLs, storage | Yes | Screenshots: 3 of 8 inspected, no key seen |
+| Full-history secret scan | Yes: 33 commits scanned, no leaks | |
+| Real Meta calls | **One scenario, one call each, 2026-11-04** | Three-scenario live runs and the live screenshot are agent-reported |
+| Accessibility | Focus, Enter, alerts, no horizontal overflow | No axe/WCAG audit, no screen reader |
+| Browsers | Chromium only | Firefox, WebKit, real phones |
 
-Hackathon submission rules, track selection, video accessibility, and deadline confirmation remain maintainer responsibilities.
+## Open issues
+
+UI items from QA_REPORT §6: (1) Extract enabled before segmentation, (2) evidence row key collisions, (3) non-Latin-1 key error message, (4) stale overlay after a failed re-segmentation. No critical or high-severity issue is open.
+
+## Licensing and third-party notices
+
+- Code and docs: **MIT** (`LICENSE`), added at the maintainer's request on 2026-11-04. Choosing MIT was my default; the maintainer should confirm it or swap it before going public.
+- Assets: **CC0 1.0**, declared in `assets/README.md` as a project decision awaiting the maintainer's confirmation.
+- `THIRD_PARTY_NOTICES.md` inventories dependency licences. The one to read is `@meta-sam/parser`, a **runtime dependency under Meta's custom SAM License** (not an OSI licence): it must accompany any redistribution of the SAM Materials, carries trade-control and anti-reverse-engineering terms, and ends if you sue Meta over the materials. Hosting the source does not itself distribute it; shipping a built artifact might. Also noted: LGPL image binaries (`sharp`), MPL-2.0 tooling, and Google Fonts (OFL) fetched at build time.
+- This is an engineering inventory, not legal advice.
+
+## Before public release
+
+1. **Rotate the Meta key** that was pasted into a chat, and confirm no other key was ever shared.
+2. Maintainer confirms the MIT and CC0 choices and the handling of the SAM License dependency.
+3. Fix or consciously accept the four UI items; re-run the live smoke test on the final commit.
+4. Re-run CI on the final `main` commit and the secret scan once more after the last merge.
+5. Check the README, demo recording and submission text say "synthetic" and distinguish fixture from live output.
+6. Open the repository in a logged-out window to see what is visible, then change visibility (maintainer only).
+
+Hackathon rules, track selection and deadlines remain the maintainer's to confirm.

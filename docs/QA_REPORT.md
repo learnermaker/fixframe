@@ -1,118 +1,109 @@
-# QA Report — Workstream D and integration-owner review
+# QA Report — Workstream D
 
-Date: 2026-11-04. This report supersedes the initial branch-state snapshot in PR #7.
+Date: 2026-11-04. Supersedes the earlier snapshots in PR #7 and the integration-owner notes.
 
-## Current repository state
+**Tested commit: `724aa04`** (QA branch `agent/qa-revalidation`, rebased on `main` @ `11674ed`, which includes the frontend PR #10, providers PR #11 and provider hardening PR #12). The commit that adds this report changes documentation only; GitHub CI was re-run on it before merge (see the PR). "Verified" below means I ran it myself; "agent-reported" means another agent said so and I did not reproduce it.
 
-- Workstream C merged in [PR #6](https://github.com/learnermaker/fixframe/pull/6).
-- Workstream D merged in [PR #7](https://github.com/learnermaker/fixframe/pull/7).
-- Maintainer accepted [ADR 0001](decisions/0001-domain-contract-transport.md) and added [ADR 0002 — BYOK](decisions/0002-byok-meta-api-key.md).
-- The repository contains domain contracts, three synthetic scenarios, fixtures, assets, workflow logic and QA harness.
-- **The runnable Next.js application and Meta provider routes are not yet present on `main`.** No open PRs were visible at the latest integration review.
-- The root `package.json` currently has only `test` and `typecheck` scripts. The CI-required `lint`, `build` and `start` scripts are absent, so CI is not yet expected to pass.
+## Environments
 
-## Evidence actually reported by Workstream C
+| | Local | CI |
+|---|---|---|
+| OS | Windows 11 Enterprise | `ubuntu-latest` |
+| Node / npm | 24.21.0 / 11.19.0 | Node 24 (`actions/setup-node@v6`) |
+| Browser | Playwright Chromium | Playwright Chromium (cached) |
 
-C's PR reports:
-- `npx vitest run`: 107 tests passed across 4 files.
-- `npx tsc --noEmit`: clean.
-- Synthetic illustrations visually inspected.
+## 1. Clean-clone regression (local, fresh `git clone` of `724aa04`)
 
-These results are agent-reported in PR #6; the integration owner has not independently run them in this environment. Lint, Next.js production build, UI integration, and live Meta calls were not run.
+Run with the fake sentinel token in the environment at build time. Durations are wall-clock on a slow Windows machine and are not representative of CI.
 
-## Evidence actually reported by Workstream D
+| Step | Result | Duration |
+|---|---|---|
+| `npm ci` | PASS | 462 s |
+| `npm run lint` | PASS | 55 s |
+| `npm run typecheck` | PASS | 35 s |
+| `npm test` (unit) | PASS, **191 tests**, 6 files | 30 s |
+| `npm run build` | PASS | 58 s |
+| `npm ci --prefix tests` | PASS | 101 s |
+| `npm run typecheck --prefix tests` | PASS | 17 s |
+| `npm run acceptance --prefix tests` | PASS, **60 tests**, 6 files | 853 s |
+| `npm run e2e --prefix tests` | PASS (exit 0; my script truncated the per-test count, CI shows 34) | 172 s |
 
-D's PR reports:
-- Test harness TypeScript check passed.
-- Seven Playwright tests were discovered/compiled, not executed.
-- Acceptance harness: 25/25 passed against a throwaway stub implementing the documented API contract.
-- Negative control: hidden fixture fallback caused the live-failure tests to fail as intended.
-- Fresh clone of the D branch and test-package install/typecheck/listing passed.
-- Root clean-clone install failed because the app package was not present at the time of that test.
+The 853 s acceptance time is much longer than the 251 s seen earlier with the same suite on a worktree. I set `META_API_TIMEOUT_MS=2000` through a shell function prefix and have not confirmed it reached the app processes, so the two hang tests probably waited the full 60 s default. I have not investigated further. CI sets the variable through the workflow `env:` and is fast.
 
-These validate the test harness, not the real application. Do not describe the app as E2E-tested.
+## 2. GitHub CI (run 41875659236, commit `724aa04`) — all green
 
-## Current acceptance matrix
+| Job | Result | Time |
+|---|---|---|
+| `secret-scan` | success | 7 s |
+| `static` (lint, typecheck, unit tests) | success | 68 s |
+| `app` (build, acceptance, Playwright) | success; Playwright 34 passed in 31 s | 3 m 15 s |
 
-| Area | Current state |
-|---|---|
-| Canonical Zod contracts and domain workflow | Merged; agent-reported unit tests |
-| Synthetic scenario fixtures and image/mask assets | Merged; source documented in `assets/README.md` |
-| Human confirmation gate | Implemented in domain reducer; needs UI E2E verification |
-| Frontend workspace | Not yet merged |
-| SAM 3.1 / Muse Spark routes | Not yet merged or live-tested |
-| BYOK | Security contract accepted in ADR 0002; implementation pending |
-| CI against app | Not yet possible; required root scripts/app are absent |
-| Playwright E2E against app | Written, not executed |
-| Secret non-disclosure | Harness tests exist; real app/bundle verification pending |
-| Accessibility/mobile checks | Not automated yet |
-| Public-release licence and notices | Pending maintainer decision and review |
+Jobs run in parallel; wall-clock is the `app` job. npm and the Playwright browser are cached. The `static` job runs without a build.
 
-## Required next verification
+**Gitleaks:** pinned CLI v8.30.1 with the release checksum verified, `fetch-depth: 0`, `--log-opts="--all"`. Scope: 39 commits reachable from any ref, **33 commits scanned**, **no leaks found**. An earlier run flagged three of my fake `FF_SENTINEL_*` test keys as `generic-api-key`; they are allowlisted by value in `.gitleaks.toml` (not by path), so a real secret placed in `tests/` would still be caught. The first CI attempts with `gitleaks-action@v2` failed with a 403 (it needs extra PR permissions and only scans PR commits) and were replaced by the CLI scan.
 
-1. Merge frontend and provider PRs only after contract/security review.
-2. Add root scripts `lint`, `typecheck`, `test`, `build`, and `start`; ensure the lockfile matches.
-3. Run clean-clone install, lint, typecheck, unit tests, production build, acceptance tests and Playwright E2E against the real app.
-4. Test fixture mode with no keys; test live-mode missing-key errors; test BYOK precedence and no-fallback behaviour using mocked upstreams.
-5. If valid credentials are available, run live SAM and Muse smoke tests against the synthetic assets and record exact results. If unavailable, state this plainly and do not claim live integration verified.
-6. Verify no key in browser bundles, HTML, responses, logs, URLs, storage, screenshots or git history. Run a dedicated history secret scanner after all agent commits.
-7. Confirm asset/code licensing, add `LICENSE` and third-party notices, then re-evaluate public visibility.
+## 3. Earlier regression on PR #12 before it merged (my own runs)
 
-## QA revalidation — Workstream D (branch `agent/qa-revalidation`, based on `main` @ `118be48`)
+PR #12 head `fd650d3` merged locally with my branch: build, lint, typecheck, 191 unit tests passed; acceptance 50/50 (251 s); Playwright 34/34 (244 s); the 10 new hardening tests (content-type gate, Meta 400/413/408/504 mapping, unsafe evidence, `META_API_TIMEOUT_MS`) 10/10. Before that, the 50 acceptance + 34 Playwright tests also passed against the pre-hardening build with the default 60 s timeout.
 
-**Still no frontend or provider implementation on `main`.** `agent/frontend` and `agent/meta-providers` still point at `c41d3c9`; there are no open PRs. So the post-integration checks requested in the follow-up brief **could not be run**, and no E2E success is claimed.
+## 4. Live Meta smoke test — run, limited
 
-### Commands actually executed
+Manual test `tests/live/live-smoke.live.ts`, run **2026-11-04 on the PR #12 build (`fd650d3`)** with a key supplied by the maintainer, passed as the BYOK header (no deployment key), key in an environment variable only. **4 of 4 tests passed in 31 s:**
 
-From a fresh `git clone` of the pushed branch (`76905e8`, Node 24.21.0 / npm 11.19.0, Windows 11):
+1. SAM 3.1, scenario `water-ingress-01`: canonical `LIVE_META` segmentation with at least one box (so it passed the frame-size check added in #12).
+2. Muse Spark 1.3, same scenario: canonical `LIVE_META` issue, `needs_review`, catalog location and asset kept, non-empty unknowns.
+3. A deliberately bad key: rejected by the real Meta API, surfaced as `UPSTREAM_ERROR`, no fixture, no fallback.
+4. The key was absent from every response and from the server log.
 
-| Command | Result |
-|---|---|
-| `npm ci` | PASS |
-| `npm run lint` | **FAIL** — `Missing script: "lint"` |
-| `npm run typecheck` | PASS |
-| `npm test` | PASS — 4 files, 107 tests (independently reproduces C's reported count) |
-| `npm run build` | **FAIL** — `Missing script: "build"` |
-| `npm ci --prefix tests` | PASS |
-| `npm run typecheck --prefix tests` | PASS (tests import C's canonical schemas and scenario catalog) |
-| `npm run acceptance --prefix tests` | **FAIL, expected** — "app exited before becoming ready" (no `start` script / app) |
-| `npm run e2e:list --prefix tests` | PASS — 28 tests in 4 files listed (14 per project x desktop and mobile 375x812); **listing only, not executed** |
-| Playwright browser install, `npm run e2e --prefix tests` | **Not run** — no app |
+**Limits:** one scenario, one call each, one day. The box count, latency and request-id presence were printed by the test but not captured here. This says nothing about accuracy, safety, or the other two scenarios. Agent C reports (not reproduced by me) live runs on all three scenarios, and the frontend PR's `08-live-meta-review-desktop.png` shows `LIVE_META` output with request IDs; both are agent-reported. The key was pasted into a chat to enable this test and must be rotated.
 
-Additional runs (not clean-clone):
-- Acceptance suite against a **throwaway stub** (scratchpad, not committed) that serves C's real fixtures and implements my reading of the API contract and ADR 0002: **42/42 passed**. This validates the harness and C's fixtures against the canonical response schemas; it says **nothing** about B's providers or A's UI.
-- Negative controls on that stub: BYOK/deployment precedence reversed -> 4 BYOK tests failed; error message echoing the key -> 6 BYOK tests failed; earlier, silent fixture fallback in live mode -> 12/12 live-failure tests failed.
-- Licence read from `package.json` of every installed package (root and `tests/`): MIT, Apache-2.0, ISC, BSD-3-Clause, plus 2 MPL-2.0 (`lightningcss` and its platform binary, a dev-only Vite tooling dependency). Production dependency of the app: `zod` 4.6.7 only. No third-party notices file yet.
-- Dedicated secret scanner: **not run** — none installed (gitleaks/trufflehog/docker absent). A `secret-scan` job (gitleaks action, full history) was added to `.github/workflows/ci.yml`; its first result is unverified. The earlier regex-only history scan is not a substitute.
+## 5. Pass/fail matrix for the follow-up brief
 
-### What changed in the tests
-- Fixture-mode responses are now validated with `SegmentResponseSchema` / `ExtractResponseSchema` (imported from `src/lib/contracts.ts`, not copied); expected location/asset come from `src/data/scenarios.ts`. Previously-guessed scenario locations were consistent with the catalog (no mismatch found).
-- New `tests/acceptance/byok.acceptance.ts` (ADR 0002): no key -> `UNCONFIGURED`; BYOK only -> forwarded upstream; deployment only; both -> BYOK for that request only, then deployment key; blank header ignored; rejected BYOK -> error, no deployment-key retry, no fixtures, no leak; fixture mode ignores both; key absent from responses, logs, upstream URLs and later-served HTML.
-- Secrets test now checks both the deployment sentinel and a BYOK sentinel.
-- New `tests/e2e/byok.e2e.ts`: masked input; header-only transmission to same-origin routes; Clear removes it from later requests; refresh clears it; no storage/cookies/URL/DOM/error-message exposure.
-- New `tests/e2e/responsive-keyboard.e2e.ts` and a second Playwright project at 375x812: no horizontal overflow, synthetic banner visible, keyboard activation of the narrated path, focus indicator, `role="alert"` errors.
+| Requirement | Status | Evidence |
+|---|---|---|
+| Clean install, lint, typecheck, unit tests, build, server starts | PASS | §1 (verified) |
+| Fixture mode works with no credentials; provenance always `DEMO_FIXTURE` | PASS | `fixture-mode` acceptance (3 scenarios, canonical schemas), Playwright |
+| Live mode without credentials -> `UNCONFIGURED` (503); unset mode is live | PASS | `live-failures` |
+| Live errors never become fixture output | PASS | `live-failures`, `byok`, `live-ui`; no `DEMO_FIXTURE` in any failing response |
+| Malformed requests / unknown scenarios fail safely; correct HTTP statuses and codes | PASS | `fixture-mode`, `live-failures`, `provider-hardening` (503/504/429/502/400/422) |
+| Non-JSON content types rejected before any upstream call | PASS | `provider-hardening` |
+| SAM and Muse responses match canonical schemas | PASS for fixtures, mock upstream and the 1-scenario live call; SAM success decoding with real masks otherwise agent-reported |
+| BYOK precedence, request-scoped, not persisted, rejected key never retried with deployment key | PASS | `byok` acceptance (mock upstream records the bearer); live bad-key call |
+| Fixture mode ignores live credentials | PASS | `byok` |
+| No key in bundles, HTML, responses, logs, URLs, storage, error messages | PASS | `secrets`, `byok`, `byok.e2e` (storage, cookies, URL, DOM), live smoke. **Screenshots/recordings:** only 3 of the 8 frontend screenshots were inspected; no key seen |
+| Clear and refresh remove the session key | PASS | `byok.e2e` |
+| Fixture flow from scenario to work order; human confirmation mandatory | PASS | `happy-path.e2e`, `gating-and-errors.e2e` (Create work order disabled until Confirm) |
+| Edits and workflow events reach the audit timeline | PASS | `happy-path.e2e` (checklist, status, feedback add events); edit provenance chip checked |
+| Error and retry states usable | PASS | `live-ui.e2e`, `gating-and-errors.e2e` |
+| Desktop 1280x800 and narrow 375x812; no horizontal overflow | PASS (Chromium viewport emulation, not a real phone) | `responsive-keyboard.e2e` in both projects |
+| Keyboard-only primary journey; visible focus; `role="alert"` errors | PASS for the path up to review (focus + Enter on controls, focus indicator, alerts). **Not a full keyboard or WCAG audit** |
+| Asset/mask consistency | PASS | `assets-masks.e2e`: all 3 masks match image size and fixture box (deliberately shifted box fails the test) |
+| Live Meta verified | **PARTIAL** — §4 |
+| Dedicated full-history secret scan | PASS | §2 |
+| Dependency licence review | DONE, see `THIRD_PARTY_NOTICES.md`; **one non-OSI runtime licence** (SAM License) needs the maintainer's attention |
 
-### Frontend label mismatches
-Cannot be assessed — there is no frontend. The expected accessible names are centralised in `tests/e2e/ui.ts` and listed in `tests/README.md`; expect a first adjustment round once A's PR exists.
+## 6. Defects and risks found
 
-### Acceptance items from the follow-up brief — status
+No critical or high-severity issue was found in my own testing. Open items:
 
-| Item | Status |
-|---|---|
-| Fixture mode works with no credentials; provenance always `DEMO_FIXTURE` | Test written; **not run on real app** |
-| Live + no credentials -> `UNCONFIGURED`; no silent fallback after live failure | Same |
-| Human confirmation before work order; issue edits/workflow events in audit timeline | UI tests written, **not run**. Domain reducer covered by C's unit tests (107 pass, reproduced) |
-| SAM / Muse responses validated against canonical schemas | Only the fixture and error shapes are checked against canonical schemas. Live-response validation needs B's adapters and the real Meta response shape — **untested** |
-| BYOK precedence, rejected key, no fallback, clearing, refresh | Tests written; harness-validated on stub only |
-| Key absent from bundles, HTML, responses, logs, URLs, storage, screenshots, errors | Tests written for all but screenshots; **not run on real app**. Screenshots/recordings need a manual review |
-| Desktop and narrow mobile; keyboard; accessible errors | Tests written, **not run** |
-| Live Meta smoke tests | **Not run** (no credentials, no adapters). Live Meta integration is **not verified** |
-| Clean-clone README setup commands | README has no setup commands yet and the app has no `lint`/`build`/`start`: **fails** |
+| # | Item | Severity | Owner |
+|---|---|---|---|
+| 1 | Extract is enabled before segmentation; fixture issues cite `image_region` evidence the reviewer may not have seen highlighted. Recommended: in fixture mode gate Extract on a segmentation result; keep it enabled in live mode | Medium (UI) | UI owner |
+| 2 | `IssueReview` keys evidence rows by `ref`, and transcript evidence shares one ref, so duplicate rows can collide | Medium (UI) | UI owner |
+| 3 | A session key with non-Latin-1 characters makes browser `fetch` throw; the UI says "server could not be reached" | Low (UI) | UI owner |
+| 4 | A failed re-segmentation leaves the old overlay and provenance on screen | Medium (UI, misleading) | UI owner |
+| 5 | Work orders can be completed with unchecked checklist items (documented product limitation) | Low | Product |
+| 6 | The unsafe-claim filter is phrase matching, not a safety classifier | Known limitation | Product |
 
-## Known limitations
+Items 1-4 were raised with Agent C and the UI owner; I did not change application code.
 
-- C's unsafe-claim filter is phrase-based, not a safety classifier.
-- Completion currently does not require all checklist items to be checked.
-- Fixture bounding boxes are not automatically tested against the masks.
-- The synthetic images are authored illustrations, not photographs; live model quality on them is unverified.
-- In-memory workflow state does not persist across refreshes.
+## 7. Not tested / limitations
+
+- Live behaviour on scenarios 2 and 3 (my own runs); live SAM/Muse variability; any accuracy or safety claim.
+- Default 60 s upstream timeout on the final build (CI and one test use 1-2 s); invalid `META_API_TIMEOUT_MS` values (they should fall back to the default) are not covered by my tests.
+- Firefox, WebKit, real mobile devices, screen readers, an axe/WCAG audit, colour-contrast checks.
+- Persistence across refresh (state is in memory by design).
+- Windows build/runtime in CI (CI is Linux only).
+- The build fetches Barlow fonts from Google Fonts, so offline builds fail.
+- Agent-reported and not reproduced: the screenshots' provenance, live runs on all three scenarios, Agent A's description of component test coverage (the 191 unit tests as a whole were run by me).
+- Branch history: I force-pushed my own PR branch (with lease) after rebasing; no shared history was rewritten.
