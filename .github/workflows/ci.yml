@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # Fake value, not a credential. The build runs with it set so the secrets test can prove it never reaches client assets.
+      META_API_TOKEN: FF_SENTINEL_TOKEN_do-not-leak-7f3a9c
+      FIXFRAME_PROVIDER_MODE: fixture
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            tests/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      # Cross-workstream acceptance + E2E (see tests/README.md)
+      - run: npm ci --prefix tests
+      - run: npm run typecheck --prefix tests
+      - run: npm run acceptance --prefix tests
+      - run: npx --prefix tests playwright install --with-deps chromium
+      - run: npm run e2e --prefix tests
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            tests/playwright-report
+            tests/test-results
+          if-no-files-found: ignore
