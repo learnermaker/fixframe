@@ -38,7 +38,9 @@ export async function providerRoute<Body extends { scenarioId: string }, T>(
   field: "segmentation" | "issue",
   run: (providers: Providers, scenario: Scenario, body: Body) => Promise<ProviderResult<T>>,
 ): Promise<Response> {
-  const body = schema.safeParse(await request.json().catch(() => undefined));
+  // A cross-site form can post text/plain without a preflight and spend the deployment key.
+  const isJson = request.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase() === "application/json";
+  const body = schema.safeParse(isJson ? await request.json().catch(() => undefined) : undefined);
   if (!body.success) return send(field, fail("UNSUPPORTED_INPUT", "The request body is not valid."));
   const scenario = getScenario(body.data.scenarioId);
   if (!scenario) return send(field, fail("UNSUPPORTED_INPUT", "Unknown scenario."));

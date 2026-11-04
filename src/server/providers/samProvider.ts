@@ -18,8 +18,16 @@ async function* eventsFor(text: string) {
   yield { type: "response.completed" };
 }
 
-async function readMasks(text: string): Promise<readonly SegmentationMaskRecord[] | null> {
+/** The parser drops each box's frame size, and coordinates are only valid in the frame we sent. */
+const describesFrame = (text: string, width: number, height: number) =>
+  [...text.matchAll(/<\|box;([^|]*)\|>/g)].every(([, fields]) => {
+    const size = Object.fromEntries(fields!.split(";").map((field) => field.split("=").map((part) => part.trim())));
+    return size.w === String(width) && size.h === String(height);
+  });
+
+async function readMasks(text: string, width: number, height: number): Promise<readonly SegmentationMaskRecord[] | null> {
   if (text.trim() === "") return []; // how SAM says nothing matched
+  if (!describesFrame(text, width, height)) return null;
   const result = await parseImageStream(eventsFor(text)).finalResult;
   const masks = recordsOfKind(result.records, "mask");
   const damaged = result.outcome.status !== "completed" || result.diagnostics.some((d) => d.severity === "error");
@@ -59,7 +67,7 @@ export const samProvider = (key: string): SegmentationProvider => ({
     let frame: Uint8Array | null;
     let boxes: Box[];
     try {
-      const masks = await readMasks(response.value.text);
+      const masks = await readMasks(response.value.text, image.width, image.height);
       if (!masks) return fail("INVALID_RESPONSE", INVALID);
       frame = paint(masks, image.width, image.height);
       boxes = masks.map(({ bounds }) => ({ x: bounds.left, y: bounds.top, width: bounds.right - bounds.left, height: bounds.bottom - bounds.top }));

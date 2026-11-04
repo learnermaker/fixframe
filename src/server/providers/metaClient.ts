@@ -1,9 +1,6 @@
 import { z } from "zod";
-import { metaApiBaseUrl } from "../env";
+import { metaApiBaseUrl, metaTimeoutMs } from "../env";
 import { fail, type ProviderResult } from "./types";
-
-// Observed about 4s for SAM and 15s for Muse Spark on the demo images; this leaves room for slow days.
-const TIMEOUT_MS = 60_000;
 
 const ResponseSchema = z.object({
   status: z.string(),
@@ -31,7 +28,7 @@ export async function createResponse(key: string, body: object): Promise<Provide
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({ store: false, ...body }),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+      signal: AbortSignal.timeout(metaTimeoutMs()),
       cache: "no-store",
     });
     raw = await response.text();
@@ -45,6 +42,9 @@ export async function createResponse(key: string, body: object): Promise<Provide
     return fail("UPSTREAM_ERROR", "Meta rejected this API key. No other key or demo data was used.");
   }
   if (response.status === 429) return fail("RATE_LIMITED", "Meta is limiting requests for this key.");
+  // Meta's error guide: these fail the same way until the request changes, so "retry" would be wrong advice.
+  if (response.status === 400 || response.status === 413) return fail("UNSUPPORTED_INPUT", "Meta could not accept this input.");
+  if (response.status === 408 || response.status === 504) return fail("TIMEOUT", "Meta timed out on this request.");
   if (!response.ok) return fail("UPSTREAM_ERROR", `Meta answered with HTTP ${response.status}.`);
 
   let json: unknown;
@@ -62,5 +62,5 @@ export async function createResponse(key: string, body: object): Promise<Provide
   const texts = content.filter((part) => part.type === "output_text").map((part) => part.text);
   // Empty text is valid (SAM's answer when nothing matches); a missing text part is not.
   if (texts.length === 0 || texts.some((text) => text === undefined)) return fail("INVALID_RESPONSE", INVALID);
-  return { ok: true, value: { text: texts.join(""), requestId: response.headers.get("x-request-id") } };
+  return { ok: true, value: { text: texts.join(""), requestId: response.headers.get("x-request-id") || null } };
 }

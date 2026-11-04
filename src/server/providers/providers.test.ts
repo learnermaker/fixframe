@@ -161,6 +161,106 @@ describe("secret handling", () => {
   });
 });
 
+describe("request boundary", () => {
+  it.each(["text/plain", "application/x-www-form-urlencoded", undefined])("refuses content type %s without calling Meta", async (type) => {
+    const response = await segmentPost(
+      new Request("http://fixframe.test/api", {
+        method: "POST",
+        headers: { ...(type ? { "content-type": type } : {}), "X-FixFrame-Meta-Key": USER_KEY },
+        body: new TextEncoder().encode(JSON.stringify({ scenarioId: SCENARIO, prompt: "patch" })),
+      }),
+    );
+    expect((await response.json()).error.code).toBe("UNSUPPORTED_INPUT");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("accepts JSON with a charset", async () => {
+    reply(metaReply(SAM_TEXT));
+    const response = await segmentPost(
+      new Request("http://fixframe.test/api", {
+        method: "POST",
+        headers: { "content-type": "application/json; charset=utf-8", "X-FixFrame-Meta-Key": USER_KEY },
+        body: JSON.stringify({ scenarioId: SCENARIO, prompt: "patch" }),
+      }),
+    );
+    expect(response.status).toBe(200);
+  });
+
+  it("treats a blank key header as no key: ADR 0002 trims and requires non-empty", async () => {
+    vi.stubEnv("META_API_TOKEN", SERVER_KEY);
+    reply(metaReply(SAM_TEXT));
+    await segmentPost(
+      new Request("http://fixframe.test/api", {
+        method: "POST",
+        headers: { "content-type": "application/json", "X-FixFrame-Meta-Key": "   " },
+        body: JSON.stringify({ scenarioId: SCENARIO, prompt: "patch" }),
+      }),
+    );
+    expect(sentBearer()).toBe(`Bearer ${SERVER_KEY}`);
+  });
+});
+
+describe("SAM mask geometry", () => {
+  /** Reads the returned PNG back into alpha values, so these tests check pixels rather than the box list. */
+  function alphaAt(dataUrl: string) {
+    const png = Buffer.from(dataUrl.split(",")[1]!, "base64");
+    const width = png.readUInt32BE(16);
+    const pixels = inflateSync(png.subarray(41, 41 + png.readUInt32BE(33)));
+    return (x: number, y: number) => pixels[y * (1 + width * 2) + 1 + x * 2 + 1];
+  }
+  const record = (id: number, left: number, top: number) =>
+    `${id}<|box;x1=${left};y1=${top};x2=${left + 59};y2=${top + 26};w=1280;h=720|><|mask;x=0;y=0;data=27,60,~!!!!M!0c[0o91w?q1!pIH4pPRVp2B3'7\`e.ioeAf6-k/#Xd8%dX9x(|>`;
+  async function segmentOf(text: string) {
+    reply(metaReply(text));
+    const parsed = SegmentResponseSchema.parse(await (await segment(USER_KEY)).json());
+    if (!parsed.ok) throw new Error("expected success");
+    return parsed.segmentation;
+  }
+  const covered = (alpha: (x: number, y: number) => number | undefined, left: number, top: number) => {
+    let count = 0;
+    for (let y = top; y < top + 27; y++) for (let x = left; x < left + 60; x++) if (alpha(x, y)) count++;
+    return count;
+  };
+
+  it("paints a mask inside its own box and nowhere else", async () => {
+    const { mask } = await segmentOf(`<0f>${record(0, 211, 228)}\n`);
+    const alpha = alphaAt(mask.value);
+    expect(covered(alpha, 211, 228)).toBeGreaterThan(0);
+    expect(alpha(210, 228)).toBe(0);
+    expect(alpha(271, 254)).toBe(0);
+    expect(alpha(211, 255)).toBe(0);
+    expect(alpha(0, 0)).toBe(0);
+  });
+
+  it("keeps every object, and overlapping objects combine into one region", async () => {
+    const one = await segmentOf(`<0f>${record(0, 211, 228)}\n`);
+    const { boxes, mask } = await segmentOf(`<0f>${record(0, 211, 228)},${record(2, 231, 238)},${record(5, 900, 500)}\n`);
+    expect(boxes).toHaveLength(3);
+    const alpha = alphaAt(mask.value);
+    expect(covered(alpha, 900, 500)).toBe(covered(alphaAt(one.mask.value), 211, 228));
+    expect(covered(alpha, 211, 228)).toBeGreaterThanOrEqual(covered(alphaAt(one.mask.value), 211, 228));
+  });
+
+  it.each([
+    ["coordinates from a different frame size", SAM_TEXT.replace("w=1280", "w=640")],
+    ["a box with no frame size", SAM_TEXT.replace(";w=1280;h=720", "")],
+    ["one good record beside a damaged line", `${SAM_TEXT}<1f>broken\n`],
+    ["a raster that does not match its box", SAM_TEXT.replace("x2=270", "x2=280")],
+    ["truncated output", SAM_TEXT.slice(0, SAM_TEXT.indexOf("data=") + 12)],
+  ])("rejects %s rather than drawing it", async (_name, text) => {
+    reply(metaReply(text));
+    const response = await segment(USER_KEY);
+    expect(response.status).toBe(502);
+    expect((await response.json()).error.code).toBe("INVALID_RESPONSE");
+  });
+
+  it("whitespace-only output is no match, while text with no masks is malformed", async () => {
+    expect((await segmentOf(" \n")).boxes).toEqual([]);
+    reply(metaReply("I cannot find that."));
+    expect((await (await segment(USER_KEY)).json()).error.code).toBe("INVALID_RESPONSE");
+  });
+});
+
 describe("SAM segmentation", () => {
   it("sends the documented request and normalizes output into the contract", async () => {
     reply(metaReply(SAM_TEXT));
@@ -240,6 +340,58 @@ describe("Muse Spark extraction", () => {
   });
 });
 
+describe("Muse Spark draft limits", () => {
+  const evidence = (supports: string) => [{ kind: "transcript", ref: transcriptRef(SCENARIO), supports }];
+
+  it.each([
+    ["a disallowed claim in evidence text", { evidence: evidence("Shows the stain was caused by a roof leak.") }, "SAFETY_REVIEW_REQUIRED", 422],
+    ["an over-long title", { title: "x".repeat(201) }, "INVALID_RESPONSE", 502],
+    ["an over-long description", { description: "very ".repeat(500) }, "INVALID_RESPONSE", 502],
+    ["an over-long unknown", { unknowns: ["x".repeat(501)] }, "INVALID_RESPONSE", 502],
+    ["too many unknowns", { unknowns: Array.from({ length: 21 }, (_, i) => `unknown ${i}`) }, "INVALID_RESPONSE", 502],
+    ["no unknowns", { unknowns: [] }, "INVALID_RESPONSE", 502],
+    ["no evidence", { evidence: [] }, "INVALID_RESPONSE", 502],
+    ["an image region it cannot have", { evidence: [{ kind: "image_region", ref: "seg-1", supports: "x" }] }, "INVALID_RESPONSE", 502],
+    ["a category outside the enum", { category: "plumbing" }, "INVALID_RESPONSE", 502],
+  ])("rejects %s", async (_name, overrides, code, status) => {
+    reply(metaReply(museText(overrides)));
+    const response = await extract(USER_KEY);
+    const body = await response.json();
+    expect(response.status).toBe(status);
+    expect(body.error.code).toBe(code);
+    expect(body.issue).toBeUndefined();
+  });
+
+  it("collapses exact repeats but keeps every distinct unknown", async () => {
+    const supports = evidence("reported location");
+    reply(metaReply(museText({ unknowns: ["source of mark", "Source of mark", "safety status"], evidence: [...supports, ...supports] })));
+    const parsed = ExtractResponseSchema.parse(await (await extract(USER_KEY)).json());
+    if (!parsed.ok) throw new Error("expected success");
+    expect(parsed.issue.unknowns).toEqual(["Source of mark", "safety status"]);
+    expect(parsed.issue.evidence).toHaveLength(1);
+  });
+
+  it("keeps an unknown that only asks about safety", async () => {
+    reply(metaReply(museText({ unknowns: ["whether it is safe to use"] })));
+    expect((await extract(USER_KEY)).status).toBe(200);
+  });
+
+  it("empty output and truncated JSON are not issues", async () => {
+    for (const text of ["", museText().slice(0, 40)]) {
+      reply(metaReply(text));
+      expect((await (await extract(USER_KEY)).json()).error.code).toBe("INVALID_RESPONSE");
+    }
+  });
+
+  it("ignores identity fields from the model", async () => {
+    reply(metaReply(museText({ assetLabel: "MADE-UP", scenarioId: "other", provenance: [] })));
+    const parsed = ExtractResponseSchema.parse(await (await extract(USER_KEY)).json());
+    if (!parsed.ok) throw new Error("expected success");
+    expect(parsed.issue).toMatchObject({ assetLabel: "CEILING-ZONE-N2", scenarioId: SCENARIO });
+    expect(parsed.issue.provenance).toHaveLength(1);
+  });
+});
+
 describe("upstream failures", () => {
   it.each([
     ["HTTP 429", 429, "RATE_LIMITED", 429],
@@ -249,6 +401,53 @@ describe("upstream failures", () => {
     const response = await extract(USER_KEY);
     expect(response.status).toBe(status);
     expect((await response.json()).error.code).toBe(code);
+  });
+
+  it.each([400, 413])("maps HTTP %i to UNSUPPORTED_INPUT and does not quote Meta's message", async (upstream) => {
+    reply({ error: { message: "secret detail about the request" } }, upstream);
+    const response = await segment(USER_KEY);
+    const text = await response.text();
+    expect(response.status).toBe(400);
+    expect(JSON.parse(text).error.code).toBe("UNSUPPORTED_INPUT");
+    expect(text).not.toContain("secret detail");
+  });
+
+  it.each([408, 504])("maps HTTP %i to TIMEOUT", async (upstream) => {
+    reply({ error: "x" }, upstream);
+    expect((await (await extract(USER_KEY)).json()).error.code).toBe("TIMEOUT");
+  });
+
+  it("maps a stall while reading the body to TIMEOUT", async () => {
+    fetchMock.mockResolvedValue({ status: 200, ok: true, headers: new Headers(), text: () => Promise.reject(new DOMException("timed out", "TimeoutError")) });
+    expect((await (await extract(USER_KEY)).json()).error.code).toBe("TIMEOUT");
+  });
+
+  it("maps an incomplete response, which is how Meta reports truncation", async () => {
+    reply({ status: "incomplete", incomplete_details: { reason: "max_output_tokens" }, output: [{ type: "reasoning", summary: [] }] });
+    const body = await (await extract(USER_KEY)).json();
+    expect(body.error.code).toBe("UPSTREAM_ERROR");
+    expect(body.issue).toBeUndefined();
+  });
+
+  it("reads past a reasoning item, as Meta's real responses have one first", async () => {
+    reply({ ...metaReply(museText()), output: [{ type: "reasoning", summary: [] }, ...metaReply(museText()).output] });
+    expect((await extract(USER_KEY)).status).toBe(200);
+  });
+
+  it("an empty request ID header becomes null, not an invalid value", async () => {
+    fetchMock.mockImplementation(async () => new Response(JSON.stringify(metaReply(museText())), { headers: { "x-request-id": "" } }));
+    const parsed = ExtractResponseSchema.parse(await (await extract(USER_KEY)).json());
+    expect(parsed.ok && parsed.issue.provenance[0]!.requestId).toBeNull();
+  });
+
+  it("uses the configured budget, and ignores a nonsense value", async () => {
+    const timeout = vi.spyOn(AbortSignal, "timeout");
+    reply(metaReply(museText()));
+    vi.stubEnv("META_API_TIMEOUT_MS", "1234");
+    await extract(USER_KEY);
+    vi.stubEnv("META_API_TIMEOUT_MS", "soon");
+    await extract(USER_KEY);
+    expect(timeout.mock.calls.map(([ms]) => ms)).toEqual([1234, 60_000]);
   });
 
   it("maps a timeout to TIMEOUT", async () => {
