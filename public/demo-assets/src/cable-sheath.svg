@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <filter id="wood" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.006 0.16" numOctaves="4" seed="11"/>
+      <feColorMatrix values="0 0 0 0 0.3  0 0 0 0 0.18  0 0 0 0 0.08  0 0 0 0.8 -0.2"/>
+    </filter>
+    <filter id="shadow"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="scuff" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="3" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="14"/>
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="720" fill="#c49a6c"/>
+  <rect width="1280" height="720" filter="url(#wood)"/>
+  <!-- Cable: both ends rest free on the bench, connected to nothing -->
+  <path fill="none" stroke="#000" stroke-opacity="0.4" stroke-width="58" stroke-linecap="round" filter="url(#shadow)"
+        d="M150 214 C340 134 480 494 690 394 C860 314 960 214 1130 324"/>
+  <path fill="none" stroke="#23262b" stroke-width="56" stroke-linecap="round"
+        d="M150 200 C340 120 480 480 690 380 C860 300 960 200 1130 310"/>
+  <path fill="none" stroke="#5a606a" stroke-opacity="0.75" stroke-width="9" stroke-linecap="round"
+        d="M150 188 C340 108 480 468 690 368 C860 288 960 188 1130 298"/>
+  <!-- Unwired end caps -->
+  <rect x="96" y="172" width="64" height="58" rx="10" fill="#3d4148" transform="rotate(-20 128 200)"/>
+  <rect x="1122" y="282" width="64" height="58" rx="10" fill="#3d4148" transform="rotate(30 1154 310)"/>
+  <!-- Mark on outer sheath; the outline is shared with masks/cable-sheath.svg -->
+  <path filter="url(#scuff)" fill="#b8b2a6" fill-opacity="0.5"
+        d="M640 366 C662 352 700 350 722 344 C728 366 732 386 730 402 C706 410 672 414 650 420 C644 402 640 384 640 366 Z"/>
+  <g stroke="#d6d1c6" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round">
+    <path d="M656 376 L710 366"/>
+    <path d="M660 392 L716 382"/>
+    <path d="M664 406 L700 398"/>
+  </g>
+  <text x="1262" y="704" text-anchor="end" font-family="Arial, sans-serif" font-size="18" fill="#2b1c0e">SYNTHETIC DEMO IMAGE</text>
+</svg>
