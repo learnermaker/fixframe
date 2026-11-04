@@ -1,17 +1,22 @@
 # Demo Evidence Photo Assets
 
-This directory is the provenance register for photographs considered for FixFrame's demo evidence scenarios.
+This directory is the provenance register for photographs used or considered for FixFrame's demo evidence scenarios.
 
-> **Status (2026-11-04):** optimised derivatives of all four photographs are committed under `public/demo-assets/evidence/`, with fixture masks for three of them under `public/demo-assets/masks/`. Three are used by scenarios, as the table under "Asset status" shows.
+> **Status (2026-11-04):** optimised derivatives of all four photographs are committed under `public/demo-assets/evidence/`, with fixture masks for three of them under `public/demo-assets/masks/`. Three photographs are used by scenarios; the fourth remains an unused candidate.
 
-## Intended demo candidates
+## Asset status
 
-| Proposed local filename | Use in demo | Creator / source | Licence | Status |
-|---|---|---|---|---|
-| `ceiling-water-damage.jpg` | Ceiling panel discolouration / visible surface damage | Atomicdragon136, Wikimedia Commons — [source file](https://commons.wikimedia.org/wiki/File:Ceiling_water_damage.jpg) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | Candidate; local file pending |
-| `industrial-pipes-corrosion.jpg` | Industrial pipes and valves with visible corrosion | Attila Lénert, Unsplash — [source photo](https://unsplash.com/photos/rusty-industrial-pipes-and-valves-in-a-factory-6uJTDNz6n0k) | [Unsplash License](https://unsplash.com/license) | Candidate; local file pending |
-| `bridge-concrete-spalling.jpg` | Concrete deterioration / spalling on bridge pier columns | OregonDOT, Wikimedia Commons — [source file](https://commons.wikimedia.org/wiki/File:Spalling_concrete_on_the_pier_columns.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) | Candidate; local file pending |
-| `bridge-corrosion-usgs.jpg` | Visible corrosion on pedestrian bridge structure | Oklahoma-Texas Water Science Center, USGS — [source page](https://www.usgs.gov/media/images/corrosion-a-pedestrian-bridge) | Public Domain (as stated on the USGS source page) | Secondary candidate; local file pending |
+| Local file (`public/demo-assets/evidence/`) | Creator / source | Licence | Scenario status |
+|---|---|---|---|
+| `ceiling-water-damage.jpg` | Atomicdragon136, Wikimedia Commons — [source file](https://commons.wikimedia.org/wiki/File:Ceiling_water_damage.jpg) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | Used: `water-ingress-01` |
+| `industrial-pipes-corrosion.jpg` | Attila Lénert, Unsplash — [source photo](https://unsplash.com/photos/rusty-industrial-pipes-and-valves-in-a-factory-6uJTDNz6n0k) | [Unsplash License](https://unsplash.com/license) | Used: `pipework-corrosion-04` |
+| `bridge-concrete-spalling.jpg` | OregonDOT, Wikimedia Commons — [source file](https://commons.wikimedia.org/wiki/File:Spalling_concrete_on_the_pier_columns.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) | Used: `concrete-spalling-05` |
+| `bridge-corrosion-usgs.jpg` | Oklahoma-Texas Water Science Center, USGS — [source page](https://www.usgs.gov/media/images/corrosion-a-pedestrian-bridge) | Public Domain (as stated on the USGS source page) | Not used; secondary candidate |
+
+
+## Licence boundary
+
+The root [MIT License](../../LICENSE) applies to original FixFrame code and project documentation only, not to these photographs. Each image retains its own terms. See [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) for the project-wide exclusions and reuse notes.
 
 ## Reviewed but not selected for the initial bundled set
 
