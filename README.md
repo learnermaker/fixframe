@@ -4,7 +4,7 @@
 
 FixFrame is an AI-assisted visual inspection workflow that turns an image and inspection context into structured, reviewable maintenance work. It combines **Meta SAM 3.1** for visual-region segmentation with **Muse Spark** for multimodal interpretation and structured issue extraction, then keeps a human in control of review, approval and work-order creation.
 
-[Repository](https://github.com/learnermaker/fixframe) · [Hackathon submission notes](docs/HACKATHON_SUBMISSION.md) · [Demo-data and safety policy](docs/DEMO_DATA.md) · [Photo credits and asset provenance](assets/demo-evidence/README.md)
+[Repository](https://github.com/learnermaker/fixframe) · [Hackathon submission notes](docs/HACKATHON_SUBMISSION.md) · [Demo-data and safety policy](docs/DEMO_DATA.md) · [Photo credits and asset provenance](assets/demo-evidence/README.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## The workflow
 
@@ -72,8 +72,6 @@ See `.env.example`, [the Meta API implementation notes](docs/META_API_NOTES.md) 
 - Server-side provider boundary with request-scoped BYOK support
 - Vitest, API acceptance tests and Playwright
 
-## Licensing and third-party materials
+## Licensing
 
-This public repository does **not currently contain a top-level `LICENSE` file**. Public visibility alone does not grant permission to reuse, modify or redistribute the project. The SAM parser and third-party photographs have their own licence terms; see [the asset provenance register](assets/demo-evidence/README.md) and review dependency licences before reuse. A project-wide open-source licence must be selected and added separately.
-
----
+Original FixFrame source code and project documentation are licensed under the [MIT License](LICENSE), subject to the exclusions and separate terms documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). In particular, the SAM parser is distributed under Meta's separate SAM License, and the demo photographs retain their individual licences. The root MIT License does not grant rights to third-party media, dependencies, Meta models or hosted services. Review the third-party notices before reusing or redistributing any of those materials.
