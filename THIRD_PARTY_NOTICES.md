@@ -22,10 +22,10 @@ Those materials remain subject to their own licences, terms, and attribution req
 - Package: https://www.npmjs.com/package/@meta-sam/parser
 - Source repository: https://github.com/meta-models/meta-sam
 - Licence: **SAM License**, not MIT.
-- Licence text: https://github.com/meta-models/meta-sam/blob/main/LICENSE
+- Licence text: included verbatim at [licenses/SAM-LICENSE.txt](licenses/SAM-LICENSE.txt); upstream source: https://github.com/meta-models/meta-sam/blob/main/LICENSE (retrieved 4 November 2026).
 - FixFrame uses the package as an installed dependency; it does not relicense or claim ownership of the package.
 
-The SAM License grants limited rights subject to its own conditions. Anyone redistributing the SAM Materials or derivative works must follow that agreement, including its requirement to provide a copy of the agreement. Check the exact version installed and its accompanying licence before redistributing a built bundle or modified SAM Materials. The package's licence may change independently of FixFrame.
+The checked-in copy is provided to satisfy the SAM License's notice requirement when the SAM Materials are redistributed with this project. The upstream licence may be updated; compare this copy with the exact package version in use before each redistribution. The SAM License grants limited rights subject to its own conditions. Anyone redistributing the SAM Materials or derivative works must follow that agreement, including its requirement to provide a copy of the agreement. Check the exact version installed and its accompanying licence before redistributing a built bundle or modified SAM Materials. The package's licence may change independently of FixFrame.
 
 ## Demo photographs
 
