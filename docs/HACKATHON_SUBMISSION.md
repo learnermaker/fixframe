@@ -1,11 +1,10 @@
-# Meta Global AI Developer Hackathon — FixFrame Submission Copy
+# Meta Global AI Developer Hackathon — FixFrame Submission 
 
 Prepared: 4 November 2026  
 Track: Indie Developer  
 Project: FixFrame  
 Repository: https://github.com/learnermaker/fixframe
 
-This document contains proposed form answers. Replace the demo-video placeholder with the final public video URL. Select subjective ratings and acceptances based on the submitter's actual experience.
 
 ## Team
 
@@ -53,34 +52,12 @@ The reviewer can inspect, edit or reject findings. A separate explicit human con
 
 The workflow needs two different capabilities that complement one another. SAM 3.1 provides prompt-driven visual segmentation, connecting an inspection prompt to a specific image region. Muse Spark provides multimodal interpretation of the image and inspection context, turning observations into structured issue drafts with supporting evidence and unknowns. Together, they move FixFrame beyond a generic chatbot or a single image classifier toward a grounded review workflow. Human validation, provenance and explicit approval remain essential: the models assist the reviewer but do not make safety or maintenance decisions autonomously.
 
-## Partner technology feedback — Fireworks, Modal, Baseten
 
-If these partner technologies were not used, answer:
-
-**Not used in this project. FixFrame accessed the Meta models through Meta Model API.**
-
-Do not invent partner usage or feedback.
-
-## Required / subjective product feedback
-
-The supplied form marks these as required but the supplied copy does not include the answer options. Choose the closest honest options in the live form:
-
-- How likely are you to build with Meta Model API?
-- How would you describe your overall opinion of Meta Model API?
 
 Answer according to your actual hands-on experience. Do not select the highest rating merely to optimise the submission.
 
 ## Additional feedback questions
 
-These answers are drafts to adapt to your actual experience.
-
-### How likely are you to recommend the Meta Model API to another developer or engineering team building with LLMs?
-
-Suggested response: **Likely**, if this matches your experience. The project integrated SAM 3.1 and Muse Spark through a common application workflow. Your actual recommendation should reflect your observed documentation, reliability, latency, support and developer experience.
-
-### How likely are you to recommend Muse Code to another developer or engineering team?
-
-The project build context does not establish use of Muse Code. Answer based on your actual hands-on experience; do not imply it was used to build FixFrame if it was not.
 
 ### What was the biggest obstacle your team hit while building this project?
 
@@ -102,22 +79,3 @@ Reworking provider integrations, prompts, structured-output schemas, evaluation 
 
 Production decisions would depend on verified performance on representative real-world data, latency and availability guarantees, rate limits, cost at expected volume, data-governance requirements, regional availability and the ability to monitor and evaluate model changes. FixFrame's current synthetic/curated demonstration is not sufficient to establish production readiness.
 
-## Verification status to understand before submitting
-
-- The GitHub Actions CI workflow passed on the current `main` commit at the time this copy was prepared. It ran install, lint, typecheck, unit tests, production build, test-package typecheck, acceptance and Playwright E2E.
-- PR #12 records provider hardening and a real Meta smoke test through FixFrame's own routes.
-- PR #13 reports successful live SAM and Muse responses for all five scenarios, each run once. These are smoke tests, not accuracy benchmarks.
-- The current `main` CI workflow does not yet include the full-history Gitleaks scan from the open QA follow-up.
-- The top-level project licence is still absent. Resolve this before claiming the project is formally open source.
-
-## Final submission checklist
-
-- [ ] Confirm exact track and problem-statement dropdown selections.
-- [ ] Add a suitable top-level project licence after reviewing dependency and asset terms.
-- [ ] Review the SAM parser's custom licence and all image attribution / reuse terms.
-- [ ] Confirm the repository is accessible while logged out.
-- [ ] Replace the video placeholder with the final public three-minute demo URL.
-- [ ] Watch the exported video and verify all live/fixture provenance claims.
-- [ ] Complete required subjective ratings honestly.
-- [ ] Review the event's permission to use, publish, share and promote submitted materials.
-- [ ] Submit before the stated deadline.
