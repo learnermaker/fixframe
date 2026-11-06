@@ -6,6 +6,9 @@
 
 FixFrame is an AI-assisted visual inspection workflow that turns an image and inspection context into structured, reviewable maintenance work. It combines **Meta SAM 3.1** for visual-region segmentation with **Muse Spark** for multimodal interpretation and structured issue extraction, then keeps a human in control of review, approval and work-order creation.
 
+
+https://youtube.com/watch?v=Q0pm6j9wfuI&si=Dumj4t_BsZSvF88H
+
 [Hackathon submission copy](docs/HACKATHON_SUBMISSION.md) · [Demo-data and safety policy](docs/DEMO_DATA.md) · [Photo credits and asset provenance](assets/demo-evidence/README.md) · [Meta API implementation notes](docs/META_API_NOTES.md)
 
 ## The workflow
