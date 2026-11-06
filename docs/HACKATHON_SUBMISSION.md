@@ -18,7 +18,6 @@ Repository: https://github.com/learnermaker/fixframe
 
 ## Problem statement / theme
 
-**Recommended selection: Push the Frontier.**
 
 Rationale: FixFrame applies multimodal AI to a physical-world workflow involving visual inspection, industrial/structural maintenance observations and accountable action. This aligns with the event's description of pushing AI into manufacturing, energy and physical systems.
 
@@ -38,9 +37,8 @@ The repository's original FixFrame source code and project documentation are lic
 
 ## Three-minute demo video
 
-**Replace with final public URL:** `[PASTE YOUTUBE OR OTHER PUBLIC VIDEO URL]`
+https://youtube.com/watch?v=Q0pm6j9wfuI&si=Dumj4t_BsZSvF88H
 
-Target duration: 2:50–2:58. Confirm that the link is accessible without sign-in and that the video demonstrates actual model calls wherever it claims to show live AI behaviour.
 
 ## Describe your use of Meta products to build the submitted project
 
